@@ -9,9 +9,9 @@ type Props = {
 export const AppLayout: FC<Props> = ({ children }) => {
   return (
     <main className="bg-white w-screen h-screen flex">
-      <Sidebar />
+      <Sidebar notes={[{title: "Cooking Recipes"}, {title: "Employees"}, {title: "Blog Posts"}]} />
       {/* <OverlayBg /> */}
-      <section className="flex-1 p-4">{children}</section>
+      <section className="flex-1">{children}</section>
     </main>
   );
 };

@@ -1,6 +1,13 @@
 import { type FC } from "react";
 
-type Props = {};
+type Notes = {
+    title: string
+    body?: any
+}
+
+type Props = {
+    notes: Notes[]
+};
 
 export const Sidebar: FC<Props> = ({}) => {
   return (

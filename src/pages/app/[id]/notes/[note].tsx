@@ -9,7 +9,24 @@ const Note: FC<Props> = ({}) => {
 
   return (
     <AppLayout>
-      <section className="bg-white w-screen h-screen">{note}</section>
+      <section className="bg-white w-full h-full flex flex-col items-center overflow-y-scroll">
+        <div className="w-full max-w-[900px] mx-auto h-full flex flex-col items-center">
+          <section
+            id="titleSection"
+            className="w-full h-full max-h-32 flex flex-col items-center justify-end"
+          >
+            {note}
+          </section>
+          <article
+            role="textbox"
+            contentEditable="true"
+            aria-multiline={true}
+            className="flex-1 w-full h-full flex flex-col items-center"
+          >
+            {note}
+          </article>
+        </div>
+      </section>
     </AppLayout>
   );
 };
