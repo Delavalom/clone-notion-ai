@@ -1,4 +1,5 @@
 import { AppLayout } from "@/components/Layouts";
+import { TipTap } from "@/components/Tiptap/TipTap";
 import { useRouter } from "next/router";
 import { type FC } from "react";
 
@@ -23,7 +24,7 @@ const Note: FC<Props> = ({}) => {
             aria-multiline={true}
             className="flex-1 w-full h-full flex flex-col items-center"
           >
-            {note}
+            <TipTap />
           </article>
         </div>
       </section>
