@@ -1,0 +1,1 @@
+export { TipTap } from "./Tiptap";
