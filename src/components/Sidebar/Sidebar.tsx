@@ -1,21 +1,30 @@
+import { useNavigation } from "@/hooks/useNavigation";
 import { type FC } from "react";
 
 type Notes = {
-    title: string
-    body?: any
-}
+  title: string;
+  body?: any;
+};
 
 type Props = {
-    notes: Notes[]
+  notes: Notes[];
 };
 
 export const Sidebar: FC<Props> = ({}) => {
+  const { isOpen } = useNavigation();
   return (
-    <aside className=" bg-zinc-100 w-3/4 md:w-2/4 lg:w-1/4 2xl:w-2/12 h-full flex flex-col border-r-2 border-opacity-100">
-      <section id="AccountBar" className="p-4 w-fit hover:bg-zinc-200">
+    <aside
+      className={`${
+        !isOpen ? "hidden" : "flex transition duration-300"
+      } bg-zinc-100 z-50 w-3/4 md:w-2/4 lg:w-1/4 2xl:w-2/12 h-full lg:flex flex-col border-r-2 border-opacity-100`}
+    >
+      <section id="AccountBar" className="p-4 w-full hover:bg-zinc-200 flex">
         <p className="w-60">Luis Arvelo&apos;s Notion</p>
       </section>
-      <section id="NotesContainer" className="h-full flex flex-col justify-between">
+      <section
+        id="NotesContainer"
+        className="h-full flex flex-col justify-between"
+      >
         <ul id="Notes" className="flex flex-col gap-2 px-1 py-4">
           <li className="hover:bg-zinc-200 rounded-md py-1 px-2 text-zinc-500 text-md">
             Cooking Recipes
