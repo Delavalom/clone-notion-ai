@@ -1,18 +1,28 @@
-import { type Editor } from '@tiptap/react'
-import { useState, type FC } from 'react'
+import { type Editor } from "@tiptap/react";
+import { useState, type FC } from "react";
+import { ArrowDown } from "lucide-react";
+import axios from "axios";
 
 type Props = {
-  editor: Editor
-  onClick: ()=> void
-}
+  editor: Editor;
+  onClick: () => void;
+};
 
 export const MenuAI: FC<Props> = ({ editor, onClick }) => {
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState("");
 
-  function getApiResult() {
+  async function getApiResult() {
     // TODO: Send the input data to the api call
-    editor.chain().insertContent(input).run()
-    onClick()
+
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt: input }),
+    });
+    const { data } = await response.json();
+    editor.chain().insertContent(data).run();
   }
 
   return (
@@ -23,12 +33,12 @@ export const MenuAI: FC<Props> = ({ editor, onClick }) => {
         type="text"
         value={input}
         onChange={(e) => {
-          setInput(e.currentTarget.value)
+          setInput(e.currentTarget.value);
         }}
         placeholder="Ask anything to AI"
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            getApiResult()
+          if (e.key === "Enter") {
+            getApiResult();
           }
         }}
       />
@@ -37,7 +47,8 @@ export const MenuAI: FC<Props> = ({ editor, onClick }) => {
         onClick={getApiResult}
       >
         {/* TODO: Add a submit logo */}
+        <ArrowDown className="w-4 h-4" />
       </button>
     </section>
-  )
-}
+  );
+};

@@ -18,18 +18,13 @@ export const TipTap: FC<Props> = () => {
   const [showModal, setShowModal] = useState(false);
   if (editor === null) return null;
   return (
-    <section className="w-full h-full">
-      {showModal && <MenuAI editor={editor} onClick={() => setShowModal(false)} />}
+    <>
+      <MenuAI editor={editor} onClick={() => setShowModal(false)} />
       <EditorContent
-        onKeyDown={(e) => {
-          if (e.key === "Space") {
-            setShowModal(true);
-          }
-        }}
         suppressContentEditableWarning={true}
         className="editorContent"
         editor={editor}
       />
-    </section>
+    </>
   );
 };

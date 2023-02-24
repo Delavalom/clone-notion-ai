@@ -4,9 +4,10 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { type FC } from "react";
 
-type Props = {};
+type Props =  {
+};
 
-const Note: FC<Props> = ({}) => {
+const Note: FC<Props> = () => {
   const { note } = useRouter().query;
 
   return (
