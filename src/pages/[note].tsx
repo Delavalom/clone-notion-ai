@@ -1,9 +1,6 @@
 import { AppLayout } from "@/components/Layouts";
-import { TipTap } from "@/components/Tiptap";
-import Head from "next/head";
 import { useRouter } from "next/router";
-import { useContext, type FC } from "react";
-import { NavigationContext } from "@/context/NavigationContext";
+import { type FC } from "react";
 import HamburgerAnimated from "@/components/HamburgerAnimated";
 
 type Props =  {
@@ -12,11 +9,11 @@ type Props =  {
 const Note: FC<Props> = () => {
   const { note } = useRouter().query;
 
+  if (!(typeof note === "string")) throw new Error("multiple pages");
+  
+
   return (
-    <AppLayout>
-      <Head>
-        <title>{note}</title>
-      </Head>
+    <AppLayout title={note}>
         <section className="bg-white w-full h-full flex flex-col items-center overflow-y-scroll">
             <section className="flex w-full h-10 p-4">
               <HamburgerAnimated />

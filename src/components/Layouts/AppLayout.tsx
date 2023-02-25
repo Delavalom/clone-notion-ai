@@ -2,14 +2,19 @@ import { ReactNode, type FC } from "react";
 import { Sidebar } from "../Sidebar";
 import { OverlayBg } from "./OverlayBg";
 import { NavigationProvider } from "../../context/NavigationContext";
+import Head from "next/head";
 
 type Props = {
   children: ReactNode;
+  title: string
 };
 
-export const AppLayout: FC<Props> = ({ children }) => {
+export const AppLayout: FC<Props> = ({ children, title }) => {
   return (
     <NavigationProvider>
+      <Head>
+        <title>{title}</title>
+      </Head>
       <main className="bg-white w-screen h-screen flex">
         <Sidebar
           notes={[

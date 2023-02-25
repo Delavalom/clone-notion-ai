@@ -1,5 +1,5 @@
 import { NavigationContext } from "@/context/NavigationContext";
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 
 export default function HamburgerAnimated() {
   const { isOpen, setIsOpen } = useContext(NavigationContext);
