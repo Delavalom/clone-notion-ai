@@ -9,9 +9,6 @@ type Props =  {
 const Note: FC<Props> = () => {
   const { note } = useRouter().query;
 
-  if (!(typeof note === "string")) throw new Error("multiple pages");
-  
-
   return (
     <AppLayout title={note}>
         <section className="bg-white w-full h-full flex flex-col items-center overflow-y-scroll">

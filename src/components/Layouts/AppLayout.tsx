@@ -6,10 +6,10 @@ import Head from "next/head";
 
 type Props = {
   children: ReactNode;
-  title: string
+  title?: string | string[]
 };
 
-export const AppLayout: FC<Props> = ({ children, title }) => {
+export const AppLayout: FC<Props> = ({ children, title = "Note"}) => {
   return (
     <NavigationProvider>
       <Head>
