@@ -17,7 +17,6 @@ const Note: FC<Props> = () => {
             </section>
           <div className="w-full max-w-[900px] mx-auto h-full flex flex-col items-center">
             <section
-              id="titleSection"
               className="w-full h-full max-h-32 flex flex-col items-center justify-end"
             >
               {note}
