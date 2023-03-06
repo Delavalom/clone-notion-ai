@@ -6,7 +6,7 @@ import { trpc } from "@/lib/trpc";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  const users = trpc.get.useQuery()
+  const notes = trpc.get.useQuery()
   const create = trpc.create.useMutation()
   
   return (
@@ -22,10 +22,7 @@ export default function Home() {
             Welcome to<br/> Notion-Clone-AI
           </h1>
         <div className={styles.center}>
-          {users?.data?.users.map((user, idx) => (
-            <h1 key={idx}>{user.name}</h1>
-          ))}
-          <button className={styles.thirteen} onClick={() => create.mutate({name: "Luis"})}>Sign In/Sign up</button>
+          <button className={styles.thirteen}>Sign In/Sign up</button>
         </div>
       </main>
     </>

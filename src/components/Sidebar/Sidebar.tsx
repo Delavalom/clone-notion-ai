@@ -1,4 +1,5 @@
 import { useNavigation } from "@/hooks/useNavigation";
+import { trpc } from "@/lib/trpc";
 import { type FC } from "react";
 
 type Notes = {
@@ -12,6 +13,13 @@ type Props = {
 
 export const Sidebar: FC<Props> = ({}) => {
   const { isOpen } = useNavigation();
+  const create = trpc.create.useMutation()
+  const data = trpc.useContext().get.getData();
+
+  function handleCreate() {
+    create.mutate({name:""})
+  }
+
   return (
     <aside
       className={`${
@@ -25,17 +33,13 @@ export const Sidebar: FC<Props> = ({}) => {
         id="NotesContainer"
         className="h-full flex flex-col justify-between"
       >
-        <ul id="Notes" className="flex flex-col gap-2 px-1 py-4">
-          <li className="hover:bg-zinc-200 rounded-md py-1 px-2 text-zinc-500 text-md">
-            Cooking Recipes
-          </li>
-          <li className="hover:bg-zinc-200 rounded-md py-1 px-2 text-zinc-500 text-md">
-            Employees
-          </li>
-          <li className="hover:bg-zinc-200 rounded-md py-1 px-2 text-zinc-500 text-md">
-            Blog Posts
-          </li>
-        </ul>
+        {data?.notes?.map((note) => (
+          <ul key={note.id} className="flex flex-col gap-2 px-1 py-4">
+            <li className="hover:bg-zinc-200 rounded-md py-1 px-2 text-zinc-500 text-md">
+              {note.title}
+            </li>
+          </ul>
+        ))}
         <button
           type="button"
           id="NewNoteButton"

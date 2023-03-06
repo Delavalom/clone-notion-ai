@@ -13,7 +13,7 @@ export const appRouter = router({
       });
     }
     return {
-      users,
+      notes: ctx.database
     };
   }),
   create: procedure

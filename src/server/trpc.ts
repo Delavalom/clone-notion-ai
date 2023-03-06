@@ -1,7 +1,8 @@
+import type { Context } from "@/server/context";
 import { initTRPC } from "@trpc/server";
 import { z } from "zod";
 
-const t = initTRPC.create();
+const t = initTRPC.context<Context>().create();
 // Avoid exporting the entire t-object
 // since it's not very descriptive.
 // For instance, the use of a t variable
