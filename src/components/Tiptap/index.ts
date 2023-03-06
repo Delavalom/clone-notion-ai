@@ -1,1 +1,0 @@
-export { TipTap } from "./Tiptap";

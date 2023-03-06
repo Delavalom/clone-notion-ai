@@ -27,7 +27,7 @@ const Note: FC<Props> = () => {
               aria-multiline={true}
               className="flex-1 w-full h-full flex flex-col items-center"
             >
-              {/* <TipTap /> */}
+              <textarea></textarea>
             </article>
           </div>
       </section>

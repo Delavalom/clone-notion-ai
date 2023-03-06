@@ -1,10 +1,8 @@
-import { type Editor } from "@tiptap/react";
 import { useState, type FC } from "react";
 import { ArrowDown } from "lucide-react";
-import axios from "axios";
 
 type Props = {
-  editor: Editor;
+  editor: any;
   onClick: () => void;
 };
 
