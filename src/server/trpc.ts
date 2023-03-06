@@ -1,8 +1,14 @@
 import type { Context } from "@/server/context";
-import { initTRPC } from "@trpc/server";
+import { TRPCError, initTRPC } from "@trpc/server";
 import { z } from "zod";
+import superjson from "superjson";
 
-const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create({
+  transformer: superjson,
+  errorFormatter({ shape }) {
+    return shape;
+  },
+});
 // Avoid exporting the entire t-object
 // since it's not very descriptive.
 // For instance, the use of a t variable
@@ -11,3 +17,17 @@ const t = initTRPC.context<Context>().create();
 // Base router and procedure helpers
 export const router = t.router;
 export const procedure = t.procedure;
+
+const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+  if (!ctx.session || !ctx.session.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
+
+procedure.use(enforceUserIsAuthed);

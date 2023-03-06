@@ -2,12 +2,16 @@ import Head from "next/head";
 import { Inter } from "@next/font/google";
 import styles from "@/styles/Home.module.css";
 import { trpc } from "@/lib/trpc";
+import { useSession, signIn } from "next-auth/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  const notes = trpc.get.useQuery()
-  const create = trpc.create.useMutation()
+  const {data: session, status} = useSession()
+  
+  if (status === "authenticated") {
+    const notes = trpc.get.useQuery()
+  }
   
   return (
     <>
@@ -22,7 +26,7 @@ export default function Home() {
             Welcome to<br/> Notion-Clone-AI
           </h1>
         <div className={styles.center}>
-          <button className={styles.thirteen}>Sign In/Sign up</button>
+          <button className={styles.thirteen} onClick={() => signIn("github")}>Sign In/Sign up</button>
         </div>
       </main>
     </>

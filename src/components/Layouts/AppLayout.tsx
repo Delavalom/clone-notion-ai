@@ -6,15 +6,11 @@ import Head from "next/head";
 
 type Props = {
   children: ReactNode;
-  title?: string | string[]
 };
 
-export const AppLayout: FC<Props> = ({ children, title = "Note"}) => {
+export const AppLayout: FC<Props> = ({ children }) => {
   return (
     <NavigationProvider>
-      <Head>
-        <title>{title}</title>
-      </Head>
       <main className="bg-white w-screen h-screen flex">
         <Sidebar
           notes={[
