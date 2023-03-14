@@ -7,12 +7,12 @@ import Head from "next/head";
 type Props = {};
 
 const Note: FC<Props> = () => {
-  const { note } = useRouter().query;
+  const { user } = useRouter().query;
 
   return (
     <AppLayout>
       <Head>
-        <title>{note}</title>
+        <title>{user}</title>
       </Head>
       <section className="bg-white w-full h-full flex flex-col items-center overflow-y-scroll">
         <section className="flex w-full h-10 p-4">
@@ -20,7 +20,7 @@ const Note: FC<Props> = () => {
         </section>
         <div className="w-full max-w-[900px] mx-auto h-full flex flex-col items-center">
           <section className="w-full h-full max-h-32 flex flex-col items-center justify-end">
-            {note}
+            {user}
           </section>
           <article className="flex-1 w-full h-full flex flex-col items-center">
             <textarea></textarea>

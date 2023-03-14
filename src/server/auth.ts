@@ -42,6 +42,9 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    async signIn(params) {
+      return `/${params.user?.name}`
+    },
   },
   providers: [
     DiscordProvider({
