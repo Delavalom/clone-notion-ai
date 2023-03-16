@@ -2,7 +2,7 @@ import { type FC } from "react";
 import { z } from "zod";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { AppLayout } from "@/components/Layouts";
-import { trpc } from "@/lib/trpc";
+import { api } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 type Props = {};
@@ -17,25 +17,20 @@ const Setup: FC<Props> = ({}) => {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(formData) });
-  const username = trpc.addUsername.useMutation();
+  const username = api.addUsername.useMutation();
 
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    const user = await username.mutate({ username: data.username });
-    return user;
+  const onSubmit: SubmitHandler<FormData> = (data) => {
+    console.log(data)
+    return username.mutate({ username: data.username });
   };
 
   return (
     <section className="w-screen h-screen flex items-center justify-center bg-white">
       <form
         className="flex flex-col gap-2 relative mx-auto w-full max-w-md bg-white px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:rounded-xl sm:px-10"
-        onSubmit={(e) => {
-          e.stopPropagation()
-          e.preventDefault()
-          return handleSubmit(onSubmit);
-        }}
+        onSubmit={handleSubmit(onSubmit)}
       >
         <label className="mb-2 block text-sm text-gray-600">Username</label>
         <input

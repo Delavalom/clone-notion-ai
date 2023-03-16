@@ -7,4 +7,8 @@ import {createTRPCContext} from '../../../server/context'
 export default trpcNext.createNextApiHandler({
   router: appRouter,
   createContext: createTRPCContext,
+  onError(obj) {
+    console.log(obj.ctx)
+    return obj
+  }
 });

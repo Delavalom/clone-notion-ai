@@ -1,5 +1,5 @@
 import { useNavigation } from "@/hooks/useNavigation";
-import { trpc } from "@/lib/trpc";
+import { api } from "@/utils/api";
 import { type FC } from "react";
 
 type Notes = {
@@ -13,8 +13,8 @@ type Props = {
 
 export const Sidebar: FC<Props> = ({}) => {
   const { isOpen } = useNavigation();
-  const create = trpc.create.useMutation()
-  const data = trpc.useContext().get.getData();
+  const create = api.create.useMutation()
+  const data = api.useContext().get.getData();
 
   function handleCreate() {
     create.mutate({name:""})

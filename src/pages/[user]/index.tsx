@@ -1,14 +1,12 @@
 import { AppLayout } from "@/components/Layouts";
-import { useRouter } from "next/router";
 import { type FC } from "react";
 import HamburgerAnimated from "@/components/HamburgerAnimated";
 import Head from "next/head";
-import { getServerSession } from "next-auth";
-import { GetServerSideProps, GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
-import { authOptions } from "@/server/auth";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import { getServerAuthSession } from "@/server/auth";
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-  const session = await getServerSession(ctx.req, ctx.res, authOptions);
+  const session = await getServerAuthSession(ctx);
 
   if (!session) {
     return {
