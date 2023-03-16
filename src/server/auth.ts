@@ -7,6 +7,7 @@ import {
 } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import { prisma } from "./db";
+import { getUsername } from "./routers/_app";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -48,7 +49,7 @@ export const authOptions: NextAuthOptions = {
      * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
      *
      * @see https://next-auth.js.org/providers/github
-    */
+     */
   ],
   adapter: PrismaAdapter(prisma),
   callbacks: {
@@ -59,9 +60,6 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async signIn() {
-      return '/setup'
-    }
   },
 };
 

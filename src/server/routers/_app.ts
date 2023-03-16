@@ -1,5 +1,15 @@
 import { z } from "zod";
 import { publicProcedure, protectedProcedure, router } from "../trpc";
+import { prisma } from "../db";
+import { Session } from "next-auth";
+
+export const getUsername = async (id: Session["user"]["id"]) => {
+  return prisma.user.findUnique({
+    where: {
+      id: id,
+    },
+  });
+};
 
 export const appRouter = router({
   addUsername: protectedProcedure
@@ -17,7 +27,7 @@ export const appRouter = router({
           username: input.username,
         },
       });
-      return userUpdate
+      return userUpdate;
     }),
 });
 

@@ -1,9 +1,10 @@
 import { type FC } from "react";
 import { z } from "zod";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { AppLayout } from "@/components/Layouts";
+
 import { api } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/router";
 
 type Props = {};
 
@@ -20,10 +21,11 @@ const Setup: FC<Props> = ({}) => {
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(formData) });
   const username = api.addUsername.useMutation();
+  const router = useRouter()
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    console.log(data)
-    return username.mutate({ username: data.username });
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    await username.mutate({ username: data.username });
+    router.push(`/${data.username}`)
   };
 
   return (
