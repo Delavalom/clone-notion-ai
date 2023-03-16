@@ -2,43 +2,16 @@ import { getServerAuthSession } from "@/server/auth";
 import { inferAsyncReturnType } from "@trpc/server";
 import { CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { Session } from "next-auth";
+import { prisma } from './db'
 
 type CreateContextOptions = {
   session: Session | null;
 };
 
 export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
-  const database = [
-    {
-      user: "",
-      notes: [
-        {
-          id: 0,
-          title: "Employees",
-          body: {
-            text: "hey how your doing",
-          },
-        },
-      ],
-    },
-    {
-      id: 1,
-      title: "whatever",
-      body: {
-        text: "hey how your doing",
-      },
-    },
-    {
-      id: 2,
-      title: "some notes",
-      body: {
-        text: "hey how your doing",
-      },
-    },
-  ];
   return {
     session: opts.session,
-    database,
+    prisma,
   };
 };
 

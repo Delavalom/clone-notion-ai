@@ -1,38 +1,23 @@
 import { z } from "zod";
 import { procedure, protectedProcedure, router } from "../trpc";
-import { TRPCError } from "@trpc/server";
-
-const users: { name: string }[] = [];
 
 export const appRouter = router({
-  get: protectedProcedure.query(({ input, ctx }) => {
-    return {
-      notes: ctx.database
-    };
-  }),
-  create: procedure
+  addUsername: protectedProcedure
     .input(
       z.object({
-        name: z.string(),
+        username: z.string().min(2).max(30),
       })
     )
-    .mutation(({ input }) => {
-      users.push(input);
-      return {
-        user: input,
-      };
-    }),
-  update: procedure
-    .input(z.object({ id: z.number() }))
-    .mutation(({ input }) => {}),
-  delete: procedure
-    .input(
-      z.object({
-        id: z.number(),
-      })
-    )
-    .mutation(({ input }) => {
-      const { id } = input;
+    .mutation(async ({ input, ctx }) => {
+      const userUpdate = await ctx.prisma.user.update({
+        where: {
+          id: ctx.session.user.id,
+        },
+        data: {
+          username: input.username,
+        },
+      });
+      return userUpdate
     }),
 });
 

@@ -42,7 +42,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async signIn(params) {
-      return `/${params.user?.id}`
+      return `/setup`
     },
   },
   providers: [
