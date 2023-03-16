@@ -30,4 +30,4 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   });
 });
 
-procedure.use(enforceUserIsAuthed);
+export const protectedProcedure = procedure.use(enforceUserIsAuthed);
