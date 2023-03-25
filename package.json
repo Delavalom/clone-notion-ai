@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "postinstall": "prisma generate",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^2.9.11",
@@ -18,11 +20,6 @@
     "@trpc/next": "^10.16.0",
     "@trpc/react-query": "^10.16.0",
     "@trpc/server": "^10.16.0",
-    "@types/node": "18.15.3",
-    "@types/react": "18.0.28",
-    "@types/react-dom": "18.0.11",
-    "eslint": "8.36.0",
-    "eslint-config-next": "13.2.4",
     "lucide-react": "^0.125.0",
     "next": "13.2.4",
     "next-auth": "^4.20.1",
@@ -31,13 +28,20 @@
     "react-dom": "18.2.0",
     "react-hook-form": "^7.43.5",
     "superjson": "^1.12.2",
-    "typescript": "5.0.2",
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@types/node": "18.15.3",
+    "@types/react": "18.0.28",
+    "@types/react-dom": "18.0.11",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.21",
+    "eslint": "8.36.0",
+    "eslint-config-next": "13.2.4",
+    "prettier": "^2.8.7",
+    "prettier-plugin-tailwindcss": "^0.2.5",
     "prisma": "^4.11.0",
+    "typescript": "5.0.2",
     "tailwindcss": "^3.2.7"
   }
 }
