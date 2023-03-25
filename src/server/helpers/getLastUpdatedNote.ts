@@ -4,7 +4,7 @@ import { prisma } from "../db";
 export const getLastUpdatedNote = async (id: string) => {
   const notes = await prisma.note.findMany({
     orderBy: {
-      updatedAt: "asc",
+      updatedAt: "desc",
     },
   });
   const note = notes.find((note) => note.userId === id);
