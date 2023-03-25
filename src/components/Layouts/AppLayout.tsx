@@ -1,7 +1,7 @@
 import { ReactNode, type FC } from "react";
 import { Sidebar } from "../Sidebar";
 import { OverlayBg } from "./OverlayBg";
-import { NavigationProvider } from "../../context/NavigationContext";
+import { NavigationProvider } from "~/context/NavigationContext";
 import Head from "next/head";
 
 type Props = {

@@ -1,5 +1,5 @@
-import { useNavigation } from "@/hooks/useNavigation";
-import { api } from "@/utils/api";
+import { useNavigation } from "~/hooks/useNavigation";
+import { api } from "~/utils/api";
 import { type FC } from "react";
 
 type Notes = {

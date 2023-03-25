@@ -2,7 +2,7 @@ import { type FC } from "react";
 import { z } from "zod";
 import { useForm, type SubmitHandler } from "react-hook-form";
 
-import { api } from "@/utils/api";
+import { api } from "~/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
 

@@ -1,4 +1,4 @@
-import { getServerAuthSession } from "@/server/auth";
+import { getServerAuthSession } from "~/server/auth";
 import { inferAsyncReturnType } from "@trpc/server";
 import { CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { Session } from "next-auth";

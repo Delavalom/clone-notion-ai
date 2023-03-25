@@ -1,5 +1,5 @@
-import { createTRPCContext } from "@/server/context";
-import { appRouter } from "@/server/routers/_app";
+import { createTRPCContext } from "~/server/context";
+import { appRouter } from "~/server/routers/_app";
 import  { type GetServerSidePropsContext } from "next";
 import superjson from 'superjson'
 

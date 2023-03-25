@@ -1,9 +1,9 @@
-import { AppLayout } from "@/components/Layouts";
+import { AppLayout } from "~/components/Layouts";
 import { type FC } from "react";
-import HamburgerAnimated from "@/components/HamburgerAnimated";
+import HamburgerAnimated from "~/components/HamburgerAnimated";
 import Head from "next/head";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
-import { getServerAuthSession } from "@/server/auth";
+import { getServerAuthSession } from "~/server/auth";
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const session = await getServerAuthSession(ctx);

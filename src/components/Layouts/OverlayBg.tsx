@@ -1,5 +1,5 @@
 import { useContext, type FC } from "react";
-import { NavigationContext } from "../../context/NavigationContext";
+import { NavigationContext } from "~/context/NavigationContext";
 
 type Props = {};
 

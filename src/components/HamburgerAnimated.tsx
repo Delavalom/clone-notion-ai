@@ -1,4 +1,4 @@
-import { NavigationContext } from "@/context/NavigationContext";
+import { NavigationContext } from "~/context/NavigationContext";
 import React, { useContext } from "react";
 
 export default function HamburgerAnimated() {

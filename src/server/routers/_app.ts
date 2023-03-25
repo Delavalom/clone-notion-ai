@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { publicProcedure, protectedProcedure, router } from "../trpc";
+import { procedure, protectedProcedure, router } from "../trpc";
 import { prisma } from "../db";
 import { Session } from "next-auth";
 

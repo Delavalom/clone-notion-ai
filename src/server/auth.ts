@@ -7,7 +7,7 @@ import {
 } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import { prisma } from "./db";
-import { getUsername } from "./routers/_app";
+import { env } from "~/env.mjs";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -38,8 +38,8 @@ declare module "next-auth" {
 export const authOptions: NextAuthOptions = {
   providers: [
     GithubProvider({
-      clientId: process.env.GITHUB_ID!,
-      clientSecret: process.env.GITHUB_SECRET!,
+      clientId: env.GITHUB_ID,
+      clientSecret: env.GITHUB_SECRET,
     }),
     /**
      * ...add more providers here.

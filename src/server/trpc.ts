@@ -1,4 +1,4 @@
-import type { Context } from "@/server/context";
+import type { Context } from "~/server/context";
 import { TRPCError, initTRPC } from "@trpc/server";
 import { z } from "zod";
 import superjson from "superjson";
@@ -12,7 +12,7 @@ const t = initTRPC.context<Context>().create({
 
 // Base router and procedure helpers
 export const router = t.router;
-export const publicProcedure = t.procedure;
+export const procedure = t.procedure;
 
 const isAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.session || !ctx.session.user) {
@@ -26,4 +26,4 @@ const isAuthed = t.middleware(({ ctx, next }) => {
   });
 });
 
-export const protectedProcedure = t.procedure.use(isAuthed);
+export const protectedProcedure = procedure.use(isAuthed);
