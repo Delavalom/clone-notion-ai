@@ -6,6 +6,6 @@ import { Session } from "next-auth";
 
 export const ssgHelper = () => createProxySSGHelpers({
   router: appRouter,
-  ctx: { prisma, session: { user: null } },
+  ctx: { prisma, session: { user: null } as unknown as Session | null},
   transformer: superjson
 });

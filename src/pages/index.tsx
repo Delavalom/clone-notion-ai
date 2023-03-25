@@ -2,27 +2,35 @@ import Head from "next/head";
 import { Inter } from "@next/font/google";
 import styles from "@/styles/Home.module.css";
 import { signIn } from "next-auth/react";
-import { GetStaticProps } from "next";
-import { ssgHelper } from "~/server/helpers/ssgHelper";
-import { api } from "~/utils/api";
+import { GetServerSideProps } from "next";
+import { getServerAuthSession } from "~/server/auth";
+import { getLastUpdatedNote } from "~/server/helpers/getLastUpdatedNote";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const getStaticProps: GetStaticProps = async  (ctx) => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerAuthSession(context);
 
-  const ssg = ssgHelper()
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
 
-  await ssg.note.getLastUpdatedNote.prefetch()
+  const note = await getLastUpdatedNote(session.user.id);
 
   return {
-    props: {
-      trpcState: ssg.dehydrate()
+    redirect: {
+      destination: `/${note.id}`,
+      permanent: false,
     },
   };
 };
 
 export default function Home() {
-  const { data } = api.note.getLastUpdatedNote.useQuery()
   return (
     <>
       <Head>
@@ -37,10 +45,7 @@ export default function Home() {
           <br /> Notion-Clone-AI
         </h1>
         <div className={styles.center}>
-          <button
-            className={styles.thirteen}
-            onClick={() => signIn()}
-          >
+          <button className={styles.thirteen} onClick={() => signIn("github")}>
             Sign In/Sign up
           </button>
         </div>
