@@ -14,9 +14,9 @@ export const AppLayout: FC<Props> = ({ children }) => {
       <main className="bg-white w-screen h-screen flex">
         <Sidebar
           notes={[
-            { title: "Cooking Recipes" },
-            { title: "Employees" },
-            { title: "Blog Posts" },
+            { id: 1, title: "Cooking Recipes" },
+            { id: 2, title: "Employees" },
+            { id: 3, title: "Blog Posts" },
           ]}
         />
         <OverlayBg />

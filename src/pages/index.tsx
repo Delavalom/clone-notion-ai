@@ -2,10 +2,27 @@ import Head from "next/head";
 import { Inter } from "@next/font/google";
 import styles from "@/styles/Home.module.css";
 import { signIn } from "next-auth/react";
+import { GetStaticProps } from "next";
+import { ssgHelper } from "~/server/helpers/ssgHelper";
+import { api } from "~/utils/api";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const getStaticProps: GetStaticProps = async  (ctx) => {
+
+  const ssg = ssgHelper()
+
+  await ssg.note.getLastUpdatedNote.prefetch()
+
+  return {
+    props: {
+      trpcState: ssg.dehydrate()
+    },
+  };
+};
+
 export default function Home() {
+  const { data } = api.note.getLastUpdatedNote.useQuery()
   return (
     <>
       <Head>
@@ -20,7 +37,10 @@ export default function Home() {
           <br /> Notion-Clone-AI
         </h1>
         <div className={styles.center}>
-          <button className={styles.thirteen} onClick={() => signIn("github")}>
+          <button
+            className={styles.thirteen}
+            onClick={() => signIn()}
+          >
             Sign In/Sign up
           </button>
         </div>

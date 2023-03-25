@@ -3,6 +3,7 @@ import { api } from "~/utils/api";
 import { type FC } from "react";
 
 type Notes = {
+  id: number;
   title: string;
   body?: any;
 };
@@ -11,13 +12,11 @@ type Props = {
   notes: Notes[];
 };
 
-export const Sidebar: FC<Props> = ({}) => {
+export const Sidebar: FC<Props> = ({ notes }) => {
   const { isOpen } = useNavigation();
-  const create = api.create.useMutation()
-  const data = api.useContext().get.getData();
 
   function handleCreate() {
-    create.mutate({name:""})
+    // create.mutate({name:""})
   }
 
   return (
@@ -33,7 +32,7 @@ export const Sidebar: FC<Props> = ({}) => {
         id="NotesContainer"
         className="h-full flex flex-col justify-between"
       >
-        {data?.notes?.map((note) => (
+        {notes?.map((note) => (
           <ul key={note.id} className="flex flex-col gap-2 px-1 py-4">
             <li className="hover:bg-zinc-200 rounded-md py-1 px-2 text-zinc-500 text-md">
               {note.title}

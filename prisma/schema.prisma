@@ -7,6 +7,18 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Note {
+  id        String   @id @default(uuid())
+  title     String   @default("untitled")
+  body      String
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notes")
+}
+
 model Account {
   id                       String  @id @default(cuid())
   userId                   String  @map("user_id")
@@ -20,7 +32,7 @@ model Account {
   scope                    String?
   id_token                 String? @db.Text
   session_state            String?
-  refresh_token_expires_in Int? 
+  refresh_token_expires_in Int?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -47,6 +59,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  notes         Note[]
 
   @@map("users")
 }

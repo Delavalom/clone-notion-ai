@@ -8,6 +8,7 @@ import {
 import GithubProvider from "next-auth/providers/github";
 import { prisma } from "./db";
 import { env } from "~/env.mjs";
+import { getLastUpdatedNote } from "./helpers/getLastUpdatedNote";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -20,7 +21,6 @@ declare module "next-auth" {
     user: {
       id: string;
       // ...other properties
-      username: string;
     } & DefaultSession["user"];
   }
 
@@ -59,7 +59,7 @@ export const authOptions: NextAuthOptions = {
         // session.user.role = user.role; <-- put other properties on the session here
       }
       return session;
-    },
+    }
   },
 };
 

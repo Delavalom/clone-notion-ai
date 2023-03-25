@@ -1,7 +1,8 @@
-import { z } from "zod";
-import { procedure, protectedProcedure, router } from "../trpc";
+import { router } from "../trpc";
 import { prisma } from "../db";
 import { Session } from "next-auth";
+import { noteRouter } from "./note";
+import { userRouter } from "./user";
 
 export const getUsername = async (id: Session["user"]["id"]) => {
   return prisma.user.findUnique({
@@ -12,23 +13,8 @@ export const getUsername = async (id: Session["user"]["id"]) => {
 };
 
 export const appRouter = router({
-  addUsername: protectedProcedure
-    .input(
-      z.object({
-        username: z.string().min(2).max(30),
-      })
-    )
-    .mutation(async ({ input, ctx }) => {
-      const userUpdate = await ctx.prisma.user.update({
-        where: {
-          id: ctx.session.user.id,
-        },
-        data: {
-          username: input.username,
-        },
-      });
-      return userUpdate;
-    }),
+  user: userRouter,
+  note: noteRouter 
 });
 
 // export type definition of API
