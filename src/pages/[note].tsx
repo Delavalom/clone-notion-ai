@@ -1,7 +1,7 @@
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { ChangeEvent, useState, type FC, useEffect } from "react";
+import { useState, type FC, useEffect } from "react";
 import { OverlayBg } from "~/components/Layouts/OverlayBg";
 import { Sidebar } from "~/components/Sidebar";
 import { NavigationProvider } from "~/context/NavigationContext";
@@ -14,8 +14,8 @@ const Note: FC<Props> = ({}) => {
   const { data: session, status } = useSession();
   const { data: notes, isLoading } = api.note.getNotes.useQuery();
   const { note: path } = useRouter().query;
-  const { mutate } = api.note.updateNoteTitle.useMutation();
   const note = notes?.find((note) => note.id === path);
+  const { mutate } = api.note.updateNoteTitle.useMutation();
   const [input, setInput] = useState<string>(note?.title ?? "untitled");
 
   useEffect(() => {
@@ -29,11 +29,11 @@ const Note: FC<Props> = ({}) => {
   }, [input]);
 
   if (isLoading || status === "loading") {
-    return <NoteSqueleton></NoteSqueleton>;
+    return <NoteSkeleton />;
   }
   return (
     <NavigationProvider>
-      <main className="flex h-screen w-screen bg-white">
+      <main className="flex h-screen w-screen bg-white transition-all duration-200">
         <Sidebar session={session} notes={notes ?? []} />
         <OverlayBg />
         <section className="flex h-full w-full flex-col items-center overflow-y-scroll bg-white">
@@ -72,6 +72,45 @@ const Note: FC<Props> = ({}) => {
 
 export default Note;
 
-const NoteSqueleton = () => {
-  return <></>;
+const NoteSkeleton = () => {
+  return (
+    <main className="flex h-screen w-screen bg-white transition-all duration-200">
+      <aside className=" h-full w-3/4 flex-col border-r-2 border-opacity-100 bg-zinc-100 md:w-2/4 lg:flex lg:w-1/4 2xl:w-2/12">
+        <section
+          id="AccountBar"
+          className="mb-8 flex w-full p-4 hover:bg-zinc-200"
+        >
+          <div className="skeleton h-8 w-full rounded-2xl " />
+        </section>
+        <section
+          id="NotesContainer"
+          className="flex h-full flex-col justify-between"
+        >
+          <nav className="flex flex-col gap-4 px-2">
+            <div className="skeleton h-3 w-4/5 rounded-lg " />
+            <div className="skeleton h-3 w-4/5 rounded-lg " />
+          </nav>
+        </section>
+      </aside>
+      <section className="flex h-full w-full flex-col items-center overflow-y-scroll bg-white">
+        <div className="skeleton mt-10 h-16 w-10/12 rounded-full" />
+        <div className="mx-auto flex h-full w-full max-w-[900px] flex-col items-center">
+          <section
+            id="titleSection"
+            className="mb-4 flex h-full max-h-32 w-full flex-col items-center justify-end gap-4"
+          >
+            <div className="skeleton h-8 w-2/5 rounded-2xl" />
+            <div className="skeleton h-3 w-4/5 rounded-lg" />
+          </section>
+          <article
+            role="textbox"
+            aria-multiline={true}
+            className="flex h-full w-full max-w-[700px] flex-1 flex-col text-left"
+          >
+            <div className="skeleton h-3 w-2/5 rounded-lg" />
+          </article>
+        </div>
+      </section>
+    </main>
+  );
 };
