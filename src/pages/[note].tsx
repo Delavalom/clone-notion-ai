@@ -7,23 +7,29 @@ import { Sidebar } from "~/components/Sidebar";
 import { NavigationProvider } from "~/context/NavigationContext";
 import { api } from "~/utils/api";
 import notesBg from "../../public/notesBg.png";
+import { toast } from "react-hot-toast";
 
 type Props = {};
 
 const Note: FC<Props> = ({}) => {
   const { data: session, status } = useSession();
-  const { data: notes, isLoading } = api.note.getNotes.useQuery();
+  const [input, setInput] = useState("");
   const { note: path } = useRouter().query;
+  const { data: notes, isLoading } = api.note.getNotes.useQuery(undefined, {
+    onSuccess(data) {
+      setInput(data.find((note) => note.id === path)?.title ?? "untitled");
+      toast.success("Successfully fetch data")
+    },
+  });
   const note = notes?.find((note) => note.id === path);
   const { mutate } = api.note.updateNoteTitle.useMutation();
-  const [input, setInput] = useState<string>(note?.title ?? "untitled");
 
   useEffect(() => {
     if (input === note?.title || !note?.id) return;
 
     const updateTitle = setTimeout(() => {
       mutate({ id: note.id, title: input });
-    }, 300);
+    }, 700);
 
     return () => clearTimeout(updateTitle);
   }, [input]);
