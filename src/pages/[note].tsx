@@ -18,11 +18,21 @@ const Note: FC<Props> = ({}) => {
   const { data: notes, isLoading } = api.note.getNotes.useQuery(undefined, {
     onSuccess(data) {
       setInput(data.find((note) => note.id === path)?.title ?? "untitled");
-      toast.success("Successfully fetch data")
+      toast.success("Successfully fetch data");
+    },
+    onError() {
+      toast.error("Couldn't the fetch data");
     },
   });
   const note = notes?.find((note) => note.id === path);
-  const { mutate } = api.note.updateNoteTitle.useMutation();
+  const { mutate } = api.note.updateNoteTitle.useMutation({
+    onSuccess(data) {
+      toast.success("Successfully update title");
+    },
+    onError({ message }) {
+      toast.error(message);
+    },
+  });
 
   useEffect(() => {
     if (input === note?.title || !note?.id) return;
