@@ -1,7 +1,7 @@
 import type { Note } from "@prisma/client";
 import Image from "next/image";
 import { withRouter, type Router } from "next/router";
-import { useEffect, useState, type FC } from "react";
+import { useEffect, type FC, useState } from "react";
 import { toast } from "react-hot-toast";
 import { OverlayBg } from "~/components/Layouts/OverlayBg";
 import { Sidebar } from "~/components/Sidebar";
@@ -14,11 +14,13 @@ type Props = {
 };
 
 const Note: FC<Props> = ({ router }) => {
+  const [input, setInput] = useState("");
   const { data: note, isLoading } = api.note.getNote.useQuery(
     { id: router.asPath.replace("/", "") },
     {
       enabled: router.isReady,
-      onSuccess(data) {
+      onSuccess({ title }) {
+        setInput(title);
         toast.success("Successfully fetch data");
       },
       onError(err) {
@@ -26,10 +28,6 @@ const Note: FC<Props> = ({ router }) => {
       },
     }
   );
-
-  if (isLoading) {
-    return <NoteSkeleton />;
-  }
 
   return (
     <NavigationProvider>
@@ -39,7 +37,11 @@ const Note: FC<Props> = ({ router }) => {
         <section className="flex h-full w-full flex-col items-center overflow-y-scroll bg-white">
           <NoteBanner isLoading={isLoading} />
           <div className="mx-auto flex h-full w-full max-w-[900px] flex-col items-center">
-            <NoteTitle note={note} isLoading={isLoading} />
+            <NoteTitle
+              isLoading={isLoading}
+              input={input}
+              setInput={setInput}
+            />
             {/* create a new component for article */}
             <article
               role="textbox"
@@ -55,23 +57,6 @@ const Note: FC<Props> = ({ router }) => {
 
 export default withRouter(Note);
 
-const NoteSkeleton = () => {
-  return (
-    <main className="flex h-screen w-screen bg-white transition-all duration-200">
-      <section className="flex h-full w-full flex-col items-center overflow-y-scroll bg-white">
-        <div className="mx-auto flex h-full w-full max-w-[900px] flex-col items-center">
-          <article
-            role="textbox"
-            aria-multiline={true}
-            className="flex h-full w-full max-w-[700px] flex-1 flex-col text-left"
-          >
-            <div className="skeleton h-3 w-2/5 rounded-lg" />
-          </article>
-        </div>
-      </section>
-    </main>
-  );
-};
 type NoteBannerProp = {
   isLoading: boolean;
 };
@@ -94,12 +79,14 @@ const NoteBanner: FC<NoteBannerProp> = ({ isLoading }) => {
 };
 
 type NoteTitleProps = {
-  note: Note | undefined;
   isLoading: boolean;
+  input: string;
+  setInput: (input: string) => void;
 };
 
-const NoteTitle: FC<NoteTitleProps> = ({ note, isLoading }) => {
-  const [input, setInput] = useState(note?.title);
+const NoteTitle: FC<NoteTitleProps> = ({ isLoading, input, setInput }) => {
+  const note = api.useContext().note.getNote.getData();
+
   const { mutate } = api.note.updateNoteTitle.useMutation({
     onSuccess() {
       toast.success("Successfully update title");

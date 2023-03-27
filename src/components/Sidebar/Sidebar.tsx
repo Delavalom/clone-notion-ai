@@ -1,13 +1,11 @@
-import { useNavigation } from "~/hooks/useNavigation";
-import { type FC } from "react";
-import { Note } from "@prisma/client";
-import Link from "next/link";
-import { Session } from "next-auth";
-import { api } from "~/utils/api";
-import { useRouter } from "next/router";
 import { Trash2 } from "lucide-react";
-import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { type FC } from "react";
+import { toast } from "react-hot-toast";
+import { useNavigation } from "~/hooks/useNavigation";
+import { api } from "~/utils/api";
 
 type Props = {};
 
@@ -15,24 +13,19 @@ export const Sidebar: FC<Props> = () => {
   const { isOpen } = useNavigation();
   const { data: session } = useSession();
   const router = useRouter();
-  const context = api.useContext()
+  const context = api.useContext();
   const { data: notes, isLoading } = api.note.getNotes.useQuery();
   const { mutate: addNewNote } = api.note.createNote.useMutation({
     onSuccess(slug) {
       router.push(`/${slug}`);
     },
   });
-  const { mutate: deleteNote,  } = api.note.deleteNote.useMutation({
-
-    onMutate({ id }) {
-      console.log(id)
-      
-      // if (router.asPath.replace("/", "") === id) {
-      //   router.push(`/${lastNote.id}`);
-      // }
-    },
+  const { mutate: deleteNote } = api.note.deleteNote.useMutation({
     onSuccess() {
-      context.note.getNotes.refetch()
+      context.note.getNotes.refetch();
+      const notes = context.note.getNotes.getData()
+      const note: string = notes ? notes[0].id : ""
+      router.push(`/${note}`);
       toast.success("Sucessfully delete Note");
     },
   });
@@ -67,10 +60,12 @@ export const Sidebar: FC<Props> = () => {
                 <li>
                   {"💬"} {note.title}
                 </li>
-                <Trash2
-                  className="hidden w-4 text-gray-500 hover:text-gray-900 group-hover:block"
-                  onClick={() => deleteNote({ id: note.id })}
-                />
+                {note.id === router.asPath.replace("/", "") && (
+                  <Trash2
+                    className="w-4 text-gray-500 hover:text-gray-900"
+                    onClick={() => deleteNote({ id: note.id })}
+                  />
+                )}
               </Link>
             </ul>
           ))}
