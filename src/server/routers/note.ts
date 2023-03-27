@@ -66,10 +66,15 @@ export const noteRouter = router({
           id: true,
         },
       });
-      const lastNote = await getLastUpdatedNote(ctx.session.user.id);
+      // const lastNote = await getLastUpdatedNote(ctx.session.user.id);
+      // if (!lastNote) {
+      //   throw new TRPCError({
+      //     code: "NOT_FOUND",
+      //   });
+      // }
       return {
         id,
-        lastNote,
+        // lastNote,
       };
     }),
   getLastUpdatedNote: protectedProcedure.query(async ({ ctx }) => {

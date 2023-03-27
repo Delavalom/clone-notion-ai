@@ -21,12 +21,17 @@ export const Sidebar: FC<Props> = () => {
       router.push(`/${slug}`);
     },
   });
-  const { mutate: deleteNote } = api.note.deleteNote.useMutation({
-    onSuccess({ id, lastNote }) {
+  const { mutate: deleteNote,  } = api.note.deleteNote.useMutation({
+
+    onMutate({ id }) {
+      console.log(id)
+      
+      // if (router.asPath.replace("/", "") === id) {
+      //   router.push(`/${lastNote.id}`);
+      // }
+    },
+    onSuccess({ id }) {
       toast.success("Sucessfully delete Note");
-      if (router.asPath.replace("/", "") === id) {
-        router.push(`/${lastNote.id}`);
-      }
     },
   });
 

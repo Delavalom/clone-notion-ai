@@ -10,25 +10,28 @@ import { api } from "~/utils/api";
 import notesBg from "../../public/notesBg.png";
 
 type Props = {
-  router: Router
+  router: Router;
 };
 
-const Note: FC<Props> = ({router}) => {
+const Note: FC<Props> = ({ router }) => {
   const [input, setInput] = useState("");
 
-  const { data: note, isLoading } = api.note.getNote.useQuery({id: router.asPath.replace("/", "")}, {
-    enabled: router.isReady,
-    onSuccess(data) {
-      setInput(data.title);
-      toast.success("Successfully fetch data");
-    },
-    onError(err) {
-      toast.error(err.message);
-    },
-  });
+  const { data: note, isLoading } = api.note.getNote.useQuery(
+    { id: router.asPath.replace("/", "") },
+    {
+      enabled: router.isReady,
+      onSuccess(data) {
+        setInput(data.title);
+        toast.success("Successfully fetch data");
+      },
+      onError(err) {
+        toast.error(err.message);
+      },
+    }
+  );
 
   const { mutate } = api.note.updateNoteTitle.useMutation({
-    onSuccess(data) {
+    onSuccess() {
       toast.success("Successfully update title");
     },
     onError({ message }) {
@@ -56,14 +59,7 @@ const Note: FC<Props> = ({router}) => {
         <Sidebar />
         <OverlayBg />
         <section className="flex h-full w-full flex-col items-center overflow-y-scroll bg-white">
-          <picture className="h-[270px] w-full">
-            <Image
-              src={notesBg}
-              width={1640}
-              height={270}
-              alt={`This is the background for the note`}
-            />
-          </picture>
+          <NoteBanner isLoading={isLoading} />
           <div className="mx-auto flex h-full w-full max-w-[900px] flex-col items-center">
             <section
               id="titleSection"
@@ -81,8 +77,7 @@ const Note: FC<Props> = ({router}) => {
               role="textbox"
               aria-multiline={true}
               className="flex h-full w-full max-w-[700px] flex-1 flex-col text-left"
-            >
-            </article>
+            ></article>
           </div>
         </section>
       </main>
@@ -90,17 +85,12 @@ const Note: FC<Props> = ({router}) => {
   );
 };
 
-
 export default withRouter(Note);
-
-
 
 const NoteSkeleton = () => {
   return (
     <main className="flex h-screen w-screen bg-white transition-all duration-200">
-      
       <section className="flex h-full w-full flex-col items-center overflow-y-scroll bg-white">
-        <div className="skeleton mt-10 h-16 w-10/12 rounded-full" />
         <div className="mx-auto flex h-full w-full max-w-[900px] flex-col items-center">
           <section
             id="titleSection"
@@ -119,5 +109,25 @@ const NoteSkeleton = () => {
         </div>
       </section>
     </main>
+  );
+};
+type NoteBannerProp = {
+  isLoading: boolean;
+};
+
+const NoteBanner: FC<NoteBannerProp> = ({ isLoading }) => {
+  if (isLoading) {
+    return <div className="skeleton mt-10 h-16 w-10/12 rounded-full" />;
+  }
+
+  return (
+    <picture className="h-[270px] w-full">
+      <Image
+        src={notesBg}
+        width={1640}
+        height={270}
+        alt={`This is the background for the note`}
+      />
+    </picture>
   );
 };
