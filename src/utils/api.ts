@@ -14,7 +14,7 @@ function getBaseUrl() {
     return `https://${env.NEXTAUTH_URL}`;
 
   // assume localhost
-  return `http://localhost:${env.PORT ?? 3000}`;
+  return `http://localhost:${env.PORT ?? 1337}`;
 }
 
 export const api = createTRPCNext<AppRouter>({

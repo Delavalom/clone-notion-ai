@@ -4,8 +4,8 @@ import { prisma } from "../db";
 import superjson from 'superjson'
 import { Session } from "next-auth";
 
-export const ssgHelper = () => createProxySSGHelpers({
+export const ssgHelper = (session:  Session | null) => createProxySSGHelpers({
   router: appRouter,
-  ctx: { prisma, session: { user: null } as unknown as Session | null},
+  ctx: { prisma, session},
   transformer: superjson
 });

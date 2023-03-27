@@ -1,27 +1,29 @@
+import type { Note } from "@prisma/client";
 import Image from "next/image";
-import { useRouter } from "next/router";
-import { useState, type FC, useEffect } from "react";
+import { withRouter, type Router } from "next/router";
+import { useEffect, useState, type FC } from "react";
+import { toast } from "react-hot-toast";
 import { OverlayBg } from "~/components/Layouts/OverlayBg";
 import { Sidebar } from "~/components/Sidebar";
 import { NavigationProvider } from "~/context/NavigationContext";
 import { api } from "~/utils/api";
 import notesBg from "../../public/notesBg.png";
-import { toast } from "react-hot-toast";
 
-type Props = {};
+type Props = {
+  router: Router
+};
 
-const Note: FC<Props> = ({}) => {
+const Note: FC<Props> = ({router}) => {
   const [input, setInput] = useState("");
-  const { asPath } = useRouter();
 
-  const { data: note, isLoading } = api.note.getNote.useQuery({id: asPath.replace('/', "")}, {
-    retry: 3,
+  const { data: note, isLoading } = api.note.getNote.useQuery({id: router.asPath.replace("/", "")}, {
+    enabled: router.isReady,
     onSuccess(data) {
       setInput(data.title);
       toast.success("Successfully fetch data");
     },
-    onError() {
-      toast.error("Couldn't the fetch data");
+    onError(err) {
+      toast.error(err.message);
     },
   });
 
@@ -47,6 +49,7 @@ const Note: FC<Props> = ({}) => {
   if (isLoading) {
     return <NoteSkeleton />;
   }
+
   return (
     <NavigationProvider>
       <main className="flex h-screen w-screen bg-white transition-all duration-200">
@@ -66,12 +69,14 @@ const Note: FC<Props> = ({}) => {
               id="titleSection"
               className="mb-4 flex h-full max-h-32 w-full flex-col items-center justify-end"
             >
+              {/* create a new component for title */}
               <input
                 onChange={(e) => setInput(e.currentTarget.value)}
                 value={input}
                 className="w-full max-w-[700px] text-left text-4xl font-black text-gray-800 outline-none"
               />
             </section>
+            {/* create a new component for article */}
             <article
               role="textbox"
               aria-multiline={true}
@@ -85,7 +90,10 @@ const Note: FC<Props> = ({}) => {
   );
 };
 
-export default Note;
+
+export default withRouter(Note);
+
+
 
 const NoteSkeleton = () => {
   return (

@@ -24,7 +24,7 @@ export const Sidebar: FC<Props> = () => {
   const { mutate: deleteNote } = api.note.deleteNote.useMutation({
     onSuccess({ id, lastNote }) {
       toast.success("Sucessfully delete Note");
-      if (router.query.note === id) {
+      if (router.asPath.replace("/", "") === id) {
         router.push(`/${lastNote.id}`);
       }
     },
