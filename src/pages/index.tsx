@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { Inter } from "@next/font/google";
-import styles from "@/styles/Home.module.css";
+import styles from "~/styles/Home.module.css";
 import { signIn } from "next-auth/react";
 import { GetServerSideProps } from "next";
 import { getServerAuthSession } from "~/server/auth";
