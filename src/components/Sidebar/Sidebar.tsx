@@ -15,6 +15,7 @@ export const Sidebar: FC<Props> = () => {
   const { isOpen } = useNavigation();
   const { data: session } = useSession();
   const router = useRouter();
+  const context = api.useContext()
   const { data: notes, isLoading } = api.note.getNotes.useQuery();
   const { mutate: addNewNote } = api.note.createNote.useMutation({
     onSuccess(slug) {
@@ -30,7 +31,8 @@ export const Sidebar: FC<Props> = () => {
       //   router.push(`/${lastNote.id}`);
       // }
     },
-    onSuccess({ id }) {
+    onSuccess() {
+      context.note.getNotes.refetch()
       toast.success("Sucessfully delete Note");
     },
   });
