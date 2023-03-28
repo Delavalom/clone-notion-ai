@@ -15,6 +15,7 @@ type Props = {
 
 const Note: FC<Props> = ({ router }) => {
   const [input, setInput] = useState("");
+  const context = api.useContext()
   const { data: note, isLoading } = api.note.getNote.useQuery(
     { id: router.asPath.replace("/", "") },
     {
@@ -28,6 +29,25 @@ const Note: FC<Props> = ({ router }) => {
       },
     }
   );
+  const { mutate } = api.note.updateNoteTitle.useMutation({
+    onSuccess() {
+      context.note.getNotes.refetch()
+      toast.success("Successfully update title");
+    },
+    onError({ message }) {
+      toast.error(message);
+    },
+  });
+
+  useEffect(() => {
+    if (input === note?.title || !note?.id) return;
+
+    const updateTitle = setTimeout(() => {
+      mutate({ id: note.id, title: input });
+    }, 700);
+
+    return () => clearTimeout(updateTitle);
+  }, [input]);
 
   return (
     <NavigationProvider>
@@ -39,15 +59,16 @@ const Note: FC<Props> = ({ router }) => {
           <div className="mx-auto flex h-full w-full max-w-[900px] flex-col items-center">
             <NoteTitle
               isLoading={isLoading}
-              input={input}
-              setInput={setInput}
+              title={input}
+              onChange={setInput}
             />
-            {/* create a new component for article */}
             <article
               role="textbox"
               aria-multiline={true}
               className="flex h-full w-full max-w-[700px] flex-1 flex-col text-left"
-            ></article>
+            >
+              {/* create a new component for article */}
+            </article>
           </div>
         </section>
       </main>
@@ -80,32 +101,11 @@ const NoteBanner: FC<NoteBannerProp> = ({ isLoading }) => {
 
 type NoteTitleProps = {
   isLoading: boolean;
-  input: string;
-  setInput: (input: string) => void;
+  title: string;
+  onChange: (input: string) => void;
 };
 
-const NoteTitle: FC<NoteTitleProps> = ({ isLoading, input, setInput }) => {
-  const note = api.useContext().note.getNote.getData();
-
-  const { mutate } = api.note.updateNoteTitle.useMutation({
-    onSuccess() {
-      toast.success("Successfully update title");
-    },
-    onError({ message }) {
-      toast.error(message);
-    },
-  });
-
-  useEffect(() => {
-    if (!input || input === note?.title || !note?.id) return;
-
-    const updateTitle = setTimeout(() => {
-      mutate({ id: note.id, title: input });
-    }, 700);
-
-    return () => clearTimeout(updateTitle);
-  }, [input]);
-
+const NoteTitle: FC<NoteTitleProps> = ({ isLoading, title, onChange }) => {
   if (isLoading) {
     return (
       <section
@@ -124,8 +124,8 @@ const NoteTitle: FC<NoteTitleProps> = ({ isLoading, input, setInput }) => {
     >
       {/* create a new component for title */}
       <input
-        onChange={(e) => setInput(e.currentTarget.value)}
-        value={input}
+        onChange={(e) => onChange(e.currentTarget.value)}
+        value={title}
         className="w-full max-w-[700px] text-left text-4xl font-black text-gray-800 outline-none"
       />
     </section>
