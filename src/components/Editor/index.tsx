@@ -1,1 +1,1 @@
-export { Editor } from './Editor'
+export { SlateEditor } from './Editor'

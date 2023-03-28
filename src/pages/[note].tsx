@@ -3,14 +3,12 @@ import Image from "next/image";
 import { withRouter, type Router } from "next/router";
 import { useEffect, useState, type FC } from "react";
 import { toast } from "react-hot-toast";
-import { createEditor } from "slate";
-import { Editable, Slate, withReact } from "slate-react";
+import { SlateEditor } from "~/components/Editor";
 import { OverlayBg } from "~/components/Layouts/OverlayBg";
 import { Sidebar } from "~/components/Sidebar";
 import { NavigationProvider } from "~/context/NavigationContext";
 import { api } from "~/utils/api";
 import notesBg from "../../public/notesBg.png";
-import { Editor } from "~/components/Editor";
 
 type Props = {
   router: Router;
@@ -71,7 +69,7 @@ const Note: FC<Props> = ({ router }) => {
               className="flex h-full w-full max-w-[700px] flex-1 flex-col text-left"
             >
               {/* create a new component for article */}
-              <Editor />
+              <SlateEditor />
             </article>
           </div>
         </section>

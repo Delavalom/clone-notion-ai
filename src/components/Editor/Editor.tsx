@@ -1,12 +1,25 @@
 import { ArrowDown } from "lucide-react";
-import { useState, type FC } from "react";
-import { createEditor } from "slate";
+import { useCallback, useState, type FC } from "react";
+import { Element, createEditor } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
+import { CodeElement, DefaultElement } from "~/utils/editor";
 
-type Props = {};
+type Props = {
+  element: Element;
+};
 
-export const Editor: FC<Props> = ({}) => {
+export const SlateEditor = () => {
   const [editor] = useState(() => withReact(createEditor()));
+
+  const renderElement = useCallback((props: any) => {
+    switch (props.element.type) {
+      case "code":
+        return <CodeElement {...props} />;
+
+      default:
+        return <DefaultElement {...props} />;
+    }
+  }, []);
 
   return (
     <Slate
@@ -17,28 +30,38 @@ export const Editor: FC<Props> = ({}) => {
           children: [{ text: "A line of text in a paragraph." }],
         },
       ]}
+      onChange={(value) => {
+        console.log(value);
+        const isAstChange = editor.operations.some(
+          (op) => "set_selection" !== op.type
+        );
+        if (isAstChange) {
+          // Save the value to Local Storage.
+          console.log(JSON.stringify(value));
+        }
+      }}
     >
-      <div>
-        <button
-          onMouseDown={(event) => {
-            event.preventDefault();
-          }}
-        >
-          Bold
-        </button>
-        <button
-          onMouseDown={(event) => {
-            event.preventDefault();
-          }}
-        >
-          Code Block
-        </button>
-      </div>
       <Editable
+        renderElement={renderElement}
         onKeyDown={(e) => {
-          if (e.key === "/") {
-            e.preventDefault();
-            editor.insertText("hola");
+          if (!e.ctrlKey) {
+            return;
+          }
+
+          switch (e.key) {
+            // When "`" is pressed, keep our existing code block logic.
+            case "`": {
+              e.preventDefault();
+
+              break;
+            }
+
+            // When "B" is pressed, bold the text in the selection.
+            case "b": {
+              e.preventDefault();
+
+              break;
+            }
           }
         }}
       />
