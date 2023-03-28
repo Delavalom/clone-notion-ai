@@ -1,4 +1,4 @@
-import type { Note } from "@prisma/client";
+import { Note } from "@prisma/client";
 import Image from "next/image";
 import { withRouter, type Router } from "next/router";
 import { useEffect, useState, type FC } from "react";
@@ -31,8 +31,8 @@ const Note: FC<Props> = ({ router }) => {
     }
   );
   const { mutate } = api.note.updateNoteTitle.useMutation({
-    onSuccess() {
-      context.note.getNotes.refetch();
+    async onSuccess() {
+      await context.note.getNotes.refetch();
       toast.success("Successfully update title");
     },
     onError({ message }) {

@@ -1,14 +1,14 @@
 import { getServerAuthSession } from "~/server/auth";
-import { inferAsyncReturnType } from "@trpc/server";
-import { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { Session } from "next-auth";
+import type { inferAsyncReturnType } from "@trpc/server";
+import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import type { Session } from "next-auth";
 import { prisma } from './db'
 
 type CreateContextOptions = {
   session: Session | null;
 };
 
-export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
+export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
     prisma,

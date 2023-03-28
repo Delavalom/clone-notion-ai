@@ -1,8 +1,7 @@
-import { NavigationContext } from "~/context/NavigationContext";
-import React, { useContext } from "react";
+import { useNavigation } from "~/hooks/useNavigation";
 
 export default function HamburgerAnimated() {
-  const { isOpen, setIsOpen } = useContext(NavigationContext);
+  const { isOpen, setIsOpen } = useNavigation();
 
   return (
 
@@ -23,7 +22,7 @@ export default function HamburgerAnimated() {
               <span
                 aria-hidden="true"
                 className={`block absolute  h-0.5 w-5 bg-current   transform transition duration-500 ease-in-out ${
-                  isOpen && "opacity-0"
+                  isOpen ? "opacity-0" : ""
                 }`}
               ></span>
               <span

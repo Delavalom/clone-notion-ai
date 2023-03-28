@@ -1,6 +1,6 @@
-import { router } from "../trpc";
+import type { Session } from "next-auth";
 import { prisma } from "../db";
-import { Session } from "next-auth";
+import { router } from "../trpc";
 import { noteRouter } from "./note";
 import { userRouter } from "./user";
 

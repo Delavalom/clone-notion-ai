@@ -1,17 +1,21 @@
-import { ReactNode, createContext, useState } from "react";
+import {
+  type ReactNode,
+  createContext,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 
-const initialState = {
-    isOpen: false,
-    setIsOpen: (isOpen: boolean) => {}
-}
+export const NavigationContext = createContext<{
+  isOpen: boolean;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
+} | null>(null);
 
-export const NavigationContext = createContext(initialState)
-
-export const NavigationProvider = ({children}: {children: ReactNode}) => {
-    const [isOpen, setIsOpen] = useState(false)
-    return (
-        <NavigationContext.Provider value={{isOpen, setIsOpen}}>
-            {children}
-        </NavigationContext.Provider>
-    )
-}
+export const NavigationProvider = ({ children }: { children: ReactNode }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <NavigationContext.Provider value={{ isOpen, setIsOpen }}>
+      {children}
+    </NavigationContext.Provider>
+  );
+};

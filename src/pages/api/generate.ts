@@ -2,7 +2,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Configuration, OpenAIApi } from "openai";
 
-
 type Data = {
   message: string;
   data?: string;
@@ -19,14 +18,14 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   try {
-    const prompt = req.body.prompt
+    const { prompt } = req.body as { prompt: string };
     const completion = await openai.createCompletion({
       model: "text-davinci-003",
       prompt: `${prompt}:\n`,
       temperature: 0.8,
       max_tokens: 250,
     });
-    console.log("resolve completion")
+    console.log("resolve completion");
     const output = completion.data.choices.pop()?.text;
     res.status(200).json({ data: output, message: "succeded" });
   } catch (error) {

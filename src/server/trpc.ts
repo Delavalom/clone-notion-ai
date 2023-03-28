@@ -1,7 +1,6 @@
-import type { Context } from "~/server/context";
 import { TRPCError, initTRPC } from "@trpc/server";
-import { z } from "zod";
 import superjson from "superjson";
+import type { Context } from "~/server/context";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,

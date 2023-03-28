@@ -1,8 +1,8 @@
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import { appRouter } from "../routers/_app";
+import type { Session } from "next-auth";
+import superjson from 'superjson';
 import { prisma } from "../db";
-import superjson from 'superjson'
-import { Session } from "next-auth";
+import { appRouter } from "../routers/_app";
 
 export const ssgHelper = (session:  Session | null) => createProxySSGHelpers({
   router: appRouter,

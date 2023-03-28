@@ -7,26 +7,24 @@ import { toast } from "react-hot-toast";
 import { useNavigation } from "~/hooks/useNavigation";
 import { api } from "~/utils/api";
 
-type Props = {};
-
-export const Sidebar: FC<Props> = () => {
+export const Sidebar: FC = () => {
   const { isOpen } = useNavigation();
   const { data: session } = useSession();
   const router = useRouter();
   const context = api.useContext();
   const { data: notes, isLoading } = api.note.getNotes.useQuery();
   const { mutate: addNewNote } = api.note.createNote.useMutation({
-    onSuccess(slug) {
-      router.push(`/${slug}`);
-      context.note.getNotes.refetch();
+    async onSuccess(slug) {
+      await router.push(`/${slug}`);
+      await context.note.getNotes.refetch();
     },
   });
   const { mutate: deleteNote } = api.note.deleteNote.useMutation({
-    onSuccess() {
-      context.note.getNotes.refetch();
-      const notes = context.note.getNotes.getData()
-      const note: string = notes ? notes[0].id : ""
-      router.push(`/${note}`);
+    async onSuccess() {
+      await context.note.getNotes.refetch();
+      const notes = context.note.getNotes.getData();
+      const note = notes ? notes[0]?.id : "";
+      await router.push(`/${note ?? ""}`);
       toast.success("Sucessfully delete Note");
     },
   });
@@ -83,7 +81,6 @@ export const Sidebar: FC<Props> = () => {
     </aside>
   );
 };
-
 
 const SidebarSkeleton: FC = () => {
   return (

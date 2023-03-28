@@ -2,7 +2,7 @@ import Head from "next/head";
 import { Inter } from "@next/font/google";
 import styles from "~/styles/Home.module.css";
 import { signIn } from "next-auth/react";
-import { GetServerSideProps } from "next";
+import type { GetServerSideProps } from "next";
 import { getServerAuthSession } from "~/server/auth";
 import { getLastUpdatedNote } from "~/server/helpers/getLastUpdatedNote";
 
@@ -40,7 +40,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <h1 className={`${inter.className} ${styles.heading}`}>
+        <h1 className={`${inter.className} ${styles.heading ?? ""}`}>
           Welcome to
           <br /> Notion-Clone-AI
         </h1>

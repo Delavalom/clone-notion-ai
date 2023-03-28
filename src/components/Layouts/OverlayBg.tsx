@@ -1,10 +1,8 @@
-import { useContext, type FC } from "react";
-import { NavigationContext } from "~/context/NavigationContext";
+import { type FC } from "react";
+import { useNavigation } from "~/hooks/useNavigation";
 
-type Props = {};
-
-export const OverlayBg: FC<Props> = () => {
-  const { isOpen, setIsOpen } = useContext(NavigationContext);
+export const OverlayBg: FC = () => {
+  const { isOpen, setIsOpen } = useNavigation();
 
   return (
     <div
