@@ -1,13 +1,16 @@
 import type { Note } from "@prisma/client";
 import Image from "next/image";
 import { withRouter, type Router } from "next/router";
-import { useEffect, type FC, useState } from "react";
+import { useEffect, useState, type FC } from "react";
 import { toast } from "react-hot-toast";
+import { createEditor } from "slate";
+import { Editable, Slate, withReact } from "slate-react";
 import { OverlayBg } from "~/components/Layouts/OverlayBg";
 import { Sidebar } from "~/components/Sidebar";
 import { NavigationProvider } from "~/context/NavigationContext";
 import { api } from "~/utils/api";
 import notesBg from "../../public/notesBg.png";
+import { Editor } from "~/components/Editor";
 
 type Props = {
   router: Router;
@@ -15,7 +18,7 @@ type Props = {
 
 const Note: FC<Props> = ({ router }) => {
   const [input, setInput] = useState("");
-  const context = api.useContext()
+  const context = api.useContext();
   const { data: note, isLoading } = api.note.getNote.useQuery(
     { id: router.asPath.replace("/", "") },
     {
@@ -31,7 +34,7 @@ const Note: FC<Props> = ({ router }) => {
   );
   const { mutate } = api.note.updateNoteTitle.useMutation({
     onSuccess() {
-      context.note.getNotes.refetch()
+      context.note.getNotes.refetch();
       toast.success("Successfully update title");
     },
     onError({ message }) {
@@ -68,6 +71,7 @@ const Note: FC<Props> = ({ router }) => {
               className="flex h-full w-full max-w-[700px] flex-1 flex-col text-left"
             >
               {/* create a new component for article */}
+              <Editor />
             </article>
           </div>
         </section>
