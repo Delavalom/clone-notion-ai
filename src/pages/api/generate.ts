@@ -31,6 +31,6 @@ export default async function handler(
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "please try again, something failed" });
+      .json({ data: undefined, message: "please try again, something failed" });
   }
 }

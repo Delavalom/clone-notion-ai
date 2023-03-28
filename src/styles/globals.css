@@ -31,14 +31,6 @@
   @apply relative space-y-5 overflow-hidden rounded-2xl bg-gray-800/5 shadow-xl shadow-black/5 before:absolute before:inset-0 before:-translate-x-full before:-skew-x-12 before:animate-[shimmer_2s_infinite] before:border-t before:border-gray-800/10 before:bg-gradient-to-r before:from-transparent before:via-gray-800/10 before:to-transparent
 }
 
-.ProseMirror p.is-editor-empty:first-child::before {
-  color: #adb5bd;
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
-}
-
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -146,7 +138,7 @@ body {
 
 a {
   color: inherit;
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 @media (prefers-color-scheme: dark) {

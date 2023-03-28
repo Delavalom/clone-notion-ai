@@ -1,4 +1,4 @@
-import { Note } from "@prisma/client";
+import { type Note } from "@prisma/client";
 import Image from "next/image";
 import { withRouter, type Router } from "next/router";
 import { useEffect, useState, type FC } from "react";

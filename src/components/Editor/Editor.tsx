@@ -1,25 +1,13 @@
 import { ArrowDown } from "lucide-react";
-import { useCallback, useState, type FC } from "react";
-import { Element, createEditor } from "slate";
+import { useState, type FC } from "react";
+import { createEditor } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
-import { CodeElement, DefaultElement } from "~/utils/editor";
-
-type Props = {
-  element: Element;
-};
+import { useRenders } from "~/hooks/useRender";
 
 export const SlateEditor = () => {
   const [editor] = useState(() => withReact(createEditor()));
 
-  const renderElement = useCallback((props: any) => {
-    switch (props.element.type) {
-      case "code":
-        return <CodeElement {...props} />;
-
-      default:
-        return <DefaultElement {...props} />;
-    }
-  }, []);
+  const { renderElement, renderLeaf } = useRenders();
 
   return (
     <Slate
@@ -43,6 +31,7 @@ export const SlateEditor = () => {
     >
       <Editable
         renderElement={renderElement}
+        renderLeaf={renderLeaf}
         onKeyDown={(e) => {
           if (!e.ctrlKey) {
             return;
@@ -69,27 +58,22 @@ export const SlateEditor = () => {
   );
 };
 
-type MenuAIProps = {
-  editor: any;
-  onClick: () => void;
-};
-
-export const MenuAI: FC<MenuAIProps> = ({ editor, onClick }) => {
+export const MenuAI: FC = () => {
   const [input, setInput] = useState("");
 
-  async function getApiResult() {
-    // TODO: Send the input data to the api call
+  // async function getApiResult() {
+  //   // TODO: Send the input data to the api call
 
-    const response = await fetch("/api/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt: input }),
-    });
-    const { data } = await response.json();
-    editor.chain().insertContent(data).run();
-  }
+  //   const response = await fetch("/api/generate", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({ prompt: input }),
+  //   });
+  //   const { data } = await response.json() as { data: string; message: string } | { data: undefined, message: string }
+  //   console.log(data)
+  // }
 
   return (
     <section className="flex max-w-[700px] items-center rounded-xl bg-zinc-700 py-2 px-6">
@@ -102,16 +86,8 @@ export const MenuAI: FC<MenuAIProps> = ({ editor, onClick }) => {
           setInput(e.currentTarget.value);
         }}
         placeholder="Ask anything to AI"
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            getApiResult();
-          }
-        }}
       />
-      <button
-        className="mx-1 w-fit rounded-full bg-indigo-500 p-1 outline-none hover:bg-indigo-900 focus:outline-none"
-        onClick={getApiResult}
-      >
+      <button className="mx-1 w-fit rounded-full bg-indigo-500 p-1 outline-none hover:bg-indigo-900 focus:outline-none">
         {/* TODO: Add a submit logo */}
         <ArrowDown className="h-4 w-4" />
       </button>
