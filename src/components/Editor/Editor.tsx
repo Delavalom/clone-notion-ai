@@ -1,55 +1,97 @@
-import { ArrowDown } from "lucide-react";
-import { useState, type FC } from "react";
-import { createEditor } from "slate";
-import { Editable, Slate, withReact } from "slate-react";
-import { useRenders } from "~/hooks/useRender";
+import { useCallback, useState } from "react";
+import {
+  createEditor,
+  type BaseEditor,
+  type Descendant,
+  Editor,
+  Transforms,
+  Element as SlateElement,
+} from "slate";
+import {
+  Editable,
+  Slate,
+  withReact,
+  type ReactEditor,
+  type RenderLeafProps,
+  type RenderElementProps,
+} from "slate-react";
+import { RenderElement, RenderLeaf } from "./Renders";
+import isHotkey from 'is-hotkey'
+
+export type CustomText = {
+  text: string;
+  bold?: true;
+  code?: true;
+  italic?: true;
+  underline?: true;
+};
+
+export type CustomElement = {
+  type:
+    | "paragraph"
+    | "bulleted-list"
+    | "block-quote"
+    | "heading-one"
+    | "heading-two"
+    | "heading-three"
+    | "list-item"
+    | "numbered-list";
+  level?: 1 | 2 | 3;
+  align?: string;
+  children: CustomText[];
+};
+
+declare module "slate" {
+  interface CustomTypes {
+    Editor: BaseEditor & ReactEditor;
+    Element: CustomElement;
+    Text: CustomText;
+  }
+}
+
+const LIST_TYPES = ["numbered-list", "bulleted-list"];
+const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"];
+
+const HOTKEYS = {
+  'mod+b': 'bold',
+  'mod+i': 'italic',
+  'mod+u': 'underline',
+  'mod+`': 'code',
+} as const
+
+const initialValue: Descendant[] = [
+  {
+    type: "paragraph",
+    children: [
+      {
+        text: "Press `space` for AI, '/' for commands...",
+      },
+    ],
+  },
+];
 
 export const SlateEditor = () => {
+  const renderElement = useCallback(
+    (props: RenderElementProps) => <RenderElement {...props} />,
+    []
+  );
+  const renderLeaf = useCallback(
+    (props: RenderLeafProps) => <RenderLeaf {...props} />,
+    []
+  );
   const [editor] = useState(() => withReact(createEditor()));
 
-  const { renderElement, renderLeaf } = useRenders();
-
   return (
-    <Slate
-      editor={editor}
-      value={[
-        {
-          type: "paragraph",
-          children: [{ text: "A line of text in a paragraph." }],
-        },
-      ]}
-      onChange={(value) => {
-        console.log(value);
-        const isAstChange = editor.operations.some(
-          (op) => "set_selection" !== op.type
-        );
-        if (isAstChange) {
-          // Save the value to Local Storage.
-          console.log(JSON.stringify(value));
-        }
-      }}
-    >
-      <Editable
-        renderElement={renderElement}
+    <Slate editor={editor} value={initialValue}>
+      <Editable 
+        renderElement={renderElement} 
         renderLeaf={renderLeaf}
-        onKeyDown={(e) => {
-          if (!e.ctrlKey) {
-            return;
-          }
-
-          switch (e.key) {
-            // When "`" is pressed, keep our existing code block logic.
-            case "`": {
-              e.preventDefault();
-
-              break;
-            }
-
-            // When "B" is pressed, bold the text in the selection.
-            case "b": {
-              e.preventDefault();
-
-              break;
+        onKeyDown={event => {
+          for (const hotkey in HOTKEYS) {
+            if (isHotkey(hotkey, event)) {
+              event.preventDefault()
+              const mark = HOTKEYS[hotkey as keyof typeof HOTKEYS]
+              toggleMark(editor, mark)
             }
           }
         }}
@@ -58,39 +100,70 @@ export const SlateEditor = () => {
   );
 };
 
-export const MenuAI: FC = () => {
-  const [input, setInput] = useState("");
+type TextType = keyof Omit<CustomText, "text">;
 
-  // async function getApiResult() {
-  //   // TODO: Send the input data to the api call
+const isMarkActive = (editor: Editor, textType: TextType) => {
+  const marks = Editor.marks(editor);
+  return marks ? marks[textType] === true : false;
+};
 
-  //   const response = await fetch("/api/generate", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({ prompt: input }),
-  //   });
-  //   const { data } = await response.json() as { data: string; message: string } | { data: undefined, message: string }
-  //   console.log(data)
-  // }
+export const toggleMark = (editor: Editor, textType: TextType) => {
+  const isActive = isMarkActive(editor, textType);
 
-  return (
-    <section className="flex max-w-[700px] items-center rounded-xl bg-zinc-700 py-2 px-6">
-      {/* TODO: add Star Logo */}
-      <input
-        className="flex-1 bg-zinc-700 text-zinc-50 outline-none"
-        type="text"
-        value={input}
-        onChange={(e) => {
-          setInput(e.currentTarget.value);
-        }}
-        placeholder="Ask anything to AI"
-      />
-      <button className="mx-1 w-fit rounded-full bg-indigo-500 p-1 outline-none hover:bg-indigo-900 focus:outline-none">
-        {/* TODO: Add a submit logo */}
-        <ArrowDown className="h-4 w-4" />
-      </button>
-    </section>
+  if (isActive) {
+    Editor.removeMark(editor, textType);
+  } else {
+    Editor.addMark(editor, textType, true);
+  }
+};
+
+const isBlockActive = (editor: Editor, type: string, blockType = "type") => {
+  const { selection } = editor;
+  if (!selection) return false;
+
+  const [match] = Array.from(
+    Editor.nodes(editor, {
+      at: Editor.unhangRange(editor, selection),
+      match: (n) =>
+        !Editor.isEditor(n) &&
+        SlateElement.isElement(n) &&
+        n[blockType as keyof CustomElement] === type,
+    })
   );
+
+  return !!match;
+};
+
+export const toggleBlock = (editor: Editor, type: CustomElement["type"]) => {
+  const isActive = isBlockActive(
+    editor,
+    type,
+    TEXT_ALIGN_TYPES.includes(type) ? "align" : "type"
+  );
+  const isList = LIST_TYPES.includes(type);
+
+  Transforms.unwrapNodes(editor, {
+    match: (n) =>
+      !Editor.isEditor(n) &&
+      SlateElement.isElement(n) &&
+      LIST_TYPES.includes(n.type) &&
+      !TEXT_ALIGN_TYPES.includes(type),
+    split: true,
+  });
+  let newProperties: Partial<SlateElement>;
+  if (TEXT_ALIGN_TYPES.includes(type)) {
+    newProperties = {
+      align: isActive ? undefined : type,
+    };
+  } else {
+    newProperties = {
+      type: isActive ? "paragraph" : isList ? "list-item" : type,
+    };
+  }
+  Transforms.setNodes<SlateElement>(editor, newProperties);
+
+  if (!isActive && isList) {
+    const block = { type, children: [] };
+    Transforms.wrapNodes(editor, block);
+  }
 };

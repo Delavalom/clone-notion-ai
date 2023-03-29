@@ -138,7 +138,6 @@ body {
 
 a {
   color: inherit;
-  text-decoration: underline;
 }
 
 @media (prefers-color-scheme: dark) {
