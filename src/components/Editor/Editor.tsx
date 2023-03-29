@@ -1,4 +1,12 @@
-import { useCallback, useState } from "react";
+/* eslint-disable react/display-name */
+import {
+  type Ref,
+  forwardRef,
+  useCallback,
+  useState,
+  type ReactNode,
+  type LegacyRef,
+} from "react";
 import {
   createEditor,
   type BaseEditor,
@@ -16,7 +24,7 @@ import {
   type RenderElementProps,
 } from "slate-react";
 import { RenderElement, RenderLeaf } from "./Renders";
-import isHotkey from 'is-hotkey'
+import isHotkey from "is-hotkey";
 
 export type CustomText = {
   text: string;
@@ -53,11 +61,11 @@ const LIST_TYPES = ["numbered-list", "bulleted-list"];
 const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"];
 
 const HOTKEYS = {
-  'mod+b': 'bold',
-  'mod+i': 'italic',
-  'mod+u': 'underline',
-  'mod+`': 'code',
-} as const
+  "mod+b": "bold",
+  "mod+i": "italic",
+  "mod+u": "underline",
+  "mod+`": "code",
+} as const;
 
 const initialValue: Descendant[] = [
   {
@@ -83,15 +91,15 @@ export const SlateEditor = () => {
 
   return (
     <Slate editor={editor} value={initialValue}>
-      <Editable 
-        renderElement={renderElement} 
+      <Editable
+        renderElement={renderElement}
         renderLeaf={renderLeaf}
-        onKeyDown={event => {
+        onKeyDown={(event) => {
           for (const hotkey in HOTKEYS) {
             if (isHotkey(hotkey, event)) {
-              event.preventDefault()
-              const mark = HOTKEYS[hotkey as keyof typeof HOTKEYS]
-              toggleMark(editor, mark)
+              event.preventDefault();
+              const mark = HOTKEYS[hotkey as keyof typeof HOTKEYS];
+              toggleMark(editor, mark);
             }
           }
         }}
@@ -167,3 +175,27 @@ export const toggleBlock = (editor: Editor, type: CustomElement["type"]) => {
     Transforms.wrapNodes(editor, block);
   }
 };
+
+type BaseProps = {
+  className: string;
+  children: ReactNode;
+  [key: string]: unknown;
+};
+
+export const Toolbar = forwardRef(
+  ({ className, ...props }: BaseProps, ref: Ref<HTMLDivElement>) => (
+    <Menu className={className} {...props} ref={ref} />
+  )
+);
+
+export const Button = forwardRef(
+  (props: BaseProps, ref: LegacyRef<HTMLSpanElement>) => (
+    <span {...props} ref={ref} />
+  )
+);
+
+export const Menu = forwardRef(
+  ({ className, ...props }: BaseProps, ref: Ref<HTMLDivElement>) => (
+    <div className={className} {...props} data-test-id="menu" ref={ref} />
+  )
+);

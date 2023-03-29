@@ -37,7 +37,7 @@ export const RenderLeaf = ({ attributes, children, leaf }: RenderLeafProps) => {
   }
 
   if (leaf.code) {
-    children = <code>{children}</code>;
+    children = <code className="bg-gray-300">{children}</code>
   }
 
   if (leaf.italic) {
