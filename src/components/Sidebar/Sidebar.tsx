@@ -12,16 +12,16 @@ export const Sidebar: FC = () => {
   const { data: session } = useSession();
   const router = useRouter();
   const context = api.useContext();
-  const { data: notes, isLoading } = api.note.getNotes.useQuery();
+  const { data: notes, isLoading, refetch } = api.note.getNotes.useQuery();
   const { mutate: addNewNote } = api.note.createNote.useMutation({
     async onSuccess(slug) {
       await router.push(`/${slug}`);
-      await context.note.getNotes.refetch();
+      await refetch();
     },
   });
   const { mutate: deleteNote } = api.note.deleteNote.useMutation({
     async onSuccess() {
-      await context.note.getNotes.refetch();
+      await refetch();
       const notes = context.note.getNotes.getData();
       const note = notes ? notes[0]?.id : "";
       await router.push(`/${note ?? ""}`);

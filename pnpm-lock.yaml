@@ -32,6 +32,7 @@ specifiers:
   react-hook-form: ^7.43.5
   react-hot-toast: ^2.4.0
   slate: ^0.91.4
+  slate-history: ^0.86.0
   slate-react: ^0.92.0
   superjson: ^1.12.2
   tailwindcss: ^3.2.7
@@ -48,7 +49,6 @@ dependencies:
   '@trpc/next': 10.16.0_hnnbignmthyfkt3wf67cuzyx2i
   '@trpc/react-query': 10.16.0_tnkr7fi5fbqnhgn52yurs4dymi
   '@trpc/server': 10.16.0
-  '@types/is-hotkey': 0.1.7
   is-hotkey: 0.2.0
   lucide-react: 0.125.0_react@18.2.0
   next: 13.2.4_biqbaboplfbrettd7655fr4n2y
@@ -59,11 +59,13 @@ dependencies:
   react-hook-form: 7.43.5_react@18.2.0
   react-hot-toast: 2.4.0_biqbaboplfbrettd7655fr4n2y
   slate: 0.91.4
+  slate-history: 0.86.0_slate@0.91.4
   slate-react: 0.92.0_6tgy34rvmll7duwkm4ydcekf3u
   superjson: 1.12.2
   zod: 3.21.4
 
 devDependencies:
+  '@types/is-hotkey': 0.1.7
   '@types/node': 18.15.3
   '@types/react': 18.0.28
   '@types/react-dom': 18.0.11
@@ -438,7 +440,6 @@ packages:
 
   /@types/is-hotkey/0.1.7:
     resolution: {integrity: sha512-yB5C7zcOM7idwYZZ1wKQ3pTfjA9BbvFqRWvKB46GFddxnJtHwi/b9y84ykQtxQPg5qhdpg4Q/kWU3EGoCTmLzQ==}
-    dev: false
 
   /@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
@@ -2792,6 +2793,15 @@ packages:
     resolution: {integrity: sha512-3dOsAHXXUkQTpOYcoAxLIorMTp4gIQr5IW3iVb7A7lFIp0VHhnynm9izx6TssdrIcVIESAlVjtnO2K8bg+Coew==}
     engines: {node: '>=12'}
     dev: true
+
+  /slate-history/0.86.0_slate@0.91.4:
+    resolution: {integrity: sha512-OxObL9tbhgwvSlnKSCpGIh7wnuaqvOj5jRExGjEyCU2Ke8ctf22HjT+jw7GEi9ttLzNTUmTEU3YIzqKGeqN+og==}
+    peerDependencies:
+      slate: '>=0.65.3'
+    dependencies:
+      is-plain-object: 5.0.0
+      slate: 0.91.4
+    dev: false
 
   /slate-react/0.92.0_6tgy34rvmll7duwkm4ydcekf3u:
     resolution: {integrity: sha512-xEDKu5RKw5f0N95l1UeNQnrB0Pxh4JPjpIZR/BVsMo0ININnLAknR99gLo46bl/Ffql4mr7LeaxQRoXxbFtJOQ==}

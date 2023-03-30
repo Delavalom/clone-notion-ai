@@ -30,15 +30,16 @@
     "react-hook-form": "^7.43.5",
     "react-hot-toast": "^2.4.0",
     "slate": "^0.91.4",
+    "slate-history": "^0.86.0",
     "slate-react": "^0.92.0",
     "superjson": "^1.12.2",
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@types/is-hotkey": "^0.1.7",
     "@types/node": "18.15.3",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
-    "@types/is-hotkey": "^0.1.7",
     "@typescript-eslint/eslint-plugin": "^5.57.0",
     "autoprefixer": "^10.4.14",
     "eslint": "8.36.0",

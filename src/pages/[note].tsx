@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { type Note } from "@prisma/client";
 import Image from "next/image";
 import { withRouter, type Router } from "next/router";
@@ -40,11 +41,14 @@ const Note: FC<Props> = ({ router }) => {
     },
   });
 
-  useEffect(() => {
-    if (input === note?.title || !note?.id) return;
+  const handleTitleUpdate = (title: string) => {
+    if (title === note?.title || !note?.id) return;
+    mutate({ id: note.id, title });
+  };
 
+  useEffect(() => {
     const updateTitle = setTimeout(() => {
-      mutate({ id: note.id, title: input });
+      handleTitleUpdate(input);
     }, 700);
 
     return () => clearTimeout(updateTitle);

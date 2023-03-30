@@ -1,19 +1,20 @@
 import { useCallback, useSyncExternalStore } from "react";
 
-function suscribe(onChange: () => void) {
+const subscribe = (onChange: () => void) => {
   document.addEventListener("selectionchange", onChange);
   return () => document.removeEventListener("selectionchange", onChange);
-}
+};
 
 function getSnapshot() {
-  const selectionObject = document.getSelection()
-
-  if(!selectionObject) return ""
-
-  return selectionObject.toString()
+  return document.getSelection();
 }
+
 export function useSelection() {
-  const selection = useSyncExternalStore(useCallback(suscribe, []), getSnapshot, () => "");
+  const selection = useSyncExternalStore(
+    useCallback(subscribe, []),
+    () => getSnapshot()?.toString(),
+    () => undefined
+  );
 
   return selection;
 }

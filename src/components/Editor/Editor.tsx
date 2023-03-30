@@ -10,10 +10,11 @@ import {
 } from "lucide-react";
 import {
   forwardRef,
+  memo,
   useCallback,
-  useState,
+  useMemo,
   type ReactNode,
-  type Ref
+  type Ref,
 } from "react";
 import {
   Editor,
@@ -23,6 +24,7 @@ import {
   type BaseEditor,
   type Descendant,
 } from "slate";
+import { withHistory } from "slate-history";
 import {
   Editable,
   Slate,
@@ -105,7 +107,36 @@ const initialValue: Descendant[] = [
   },
 ];
 
+type MemoEditableProps = {
+  editor: Editor;
+  renderElement: (props: RenderElementProps) => JSX.Element;
+  renderLeaf: (props: RenderLeafProps) => JSX.Element;
+};
+
+export const MemoEditable = memo(
+  ({ editor, renderElement, renderLeaf }: MemoEditableProps) => {
+    return (
+      <Editable
+        renderElement={renderElement}
+        renderLeaf={renderLeaf}
+        onKeyDown={(e) => {
+          for (const hotkey in HOTKEYS) {
+            if (isHotkey(hotkey, e)) {
+              e.stopPropagation();
+              e.preventDefault();
+              const mark = HOTKEYS[hotkey as keyof typeof HOTKEYS];
+              toggleMark(editor, mark);
+            }
+          }
+        }}
+      />
+    );
+  }
+);
+
 export const SlateEditor = () => {
+  const selection = useSelection();
+
   const renderElement = useCallback(
     (props: RenderElementProps) => <RenderElement {...props} />,
     []
@@ -114,8 +145,8 @@ export const SlateEditor = () => {
     (props: RenderLeafProps) => <RenderLeaf {...props} />,
     []
   );
-  const [editor] = useState(() => withReact(createEditor()));
-  const selection = useSelection();
+
+  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   return (
     <Slate editor={editor} value={initialValue}>
@@ -126,7 +157,9 @@ export const SlateEditor = () => {
         TODO: the only way to make toolbar dissapear is by move cursor of selecting text or click outside toolbar
       */}
       {selection && (
-        <Toolbar className="relative flex w-fit items-center overflow-hidden rounded-lg bg-gray-900/5 shadow-md">
+        <Toolbar
+          className={`relative flex w-fit items-center overflow-hidden rounded-lg bg-gray-900/5 shadow-md`}
+        >
           <MarkButton type="bold" Icon={Bold} />
           <MarkButton type="italic" Icon={Italic} />
           <MarkButton type="underline" Icon={Underline} />
@@ -134,18 +167,10 @@ export const SlateEditor = () => {
           <MarkButton type="code" Icon={Code} />
         </Toolbar>
       )}
-      <Editable
+      <MemoEditable
+        editor={editor}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
-        onKeyDown={(event) => {
-          for (const hotkey in HOTKEYS) {
-            if (isHotkey(hotkey, event)) {
-              event.preventDefault();
-              const mark = HOTKEYS[hotkey as keyof typeof HOTKEYS];
-              toggleMark(editor, mark);
-            }
-          }
-        }}
       />
     </Slate>
   );
@@ -219,42 +244,54 @@ export const toggleBlock = (editor: Editor, type: CustomElement["type"]) => {
   }
 };
 
-const MarkButton = ({ type, Icon }: { type: TextType; Icon: LucideIcon }) => {
-  const editor = useSlate();
-  return (
-    <Button
-      className="h-full w-full border-gray-500/5 px-2 py-2 transition-all duration-100 hover:border-x-2 hover:bg-gray-200"
-      active={isMarkActive(editor, type)}
-      onMouseDown={(e: MouseEvent) => {
-        e.preventDefault();
-        toggleMark(editor, type);
-      }}
-    >
-      {<Icon className="h-4 w-4 stroke-gray-800 stroke-2" />}
-    </Button>
-  );
-};
+const MarkButton = memo(
+  ({ type, Icon }: { type: TextType; Icon: LucideIcon }) => {
+    const editor = useSlate();
+    return (
+      <Button
+        className="h-full w-full border-gray-500/5 px-2 py-2 transition-all duration-100 hover:border-x-2 hover:bg-gray-200"
+        active={isMarkActive(editor, type)}
+        onMouseDown={(e: MouseEvent) => {
+          e.preventDefault();
+          toggleMark(editor, type);
+        }}
+      >
+        {<Icon className="h-4 w-4 stroke-gray-800 stroke-2" />}
+      </Button>
+    );
+  }
+);
 
 type BaseProps = {
   className: string;
   children: ReactNode;
-  active: boolean
+  active: boolean;
   [key: string]: unknown;
 };
 
-export const Toolbar = forwardRef(
-  ({ className, children, ...props }: BaseProps, ref: Ref<HTMLDivElement>) => (
-    <Menu className={className} {...props} ref={ref}>
-      {children}
-    </Menu>
+export const Toolbar = memo(
+  forwardRef(
+    (
+      { className, children, ...props }: BaseProps,
+      ref: Ref<HTMLDivElement>
+    ) => (
+      <Menu className={className} {...props} ref={ref}>
+        {children}
+      </Menu>
+    )
   )
 );
 
-export const Button = forwardRef(
-  ({ children, active, ...props }: BaseProps, ref: Ref<HTMLButtonElement>) => (
-    <button {...props} ref={ref} style={{color: active ? "blue" : "black" }}>
-      {children}
-    </button>
+export const Button = memo(
+  forwardRef(
+    (
+      { children, active, ...props }: BaseProps,
+      ref: Ref<HTMLButtonElement>
+    ) => (
+      <button {...props} ref={ref} style={{ color: active ? "blue" : "black" }}>
+        {children}
+      </button>
+    )
   )
 );
 
