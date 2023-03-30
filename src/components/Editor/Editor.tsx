@@ -1,30 +1,39 @@
 /* eslint-disable react/display-name */
+import isHotkey from "is-hotkey";
 import {
-  type Ref,
+  Bold,
+  Code,
+  Italic,
+  Strikethrough,
+  Underline,
+  type LucideIcon,
+} from "lucide-react";
+import {
   forwardRef,
   useCallback,
   useState,
   type ReactNode,
-  type LegacyRef,
+  type Ref
 } from "react";
 import {
+  Editor,
+  Element as SlateElement,
+  Transforms,
   createEditor,
   type BaseEditor,
   type Descendant,
-  Editor,
-  Transforms,
-  Element as SlateElement,
 } from "slate";
 import {
   Editable,
   Slate,
+  useSlate,
   withReact,
   type ReactEditor,
-  type RenderLeafProps,
   type RenderElementProps,
+  type RenderLeafProps,
 } from "slate-react";
+import { useSelection } from "~/hooks/useSelection";
 import { RenderElement, RenderLeaf } from "./Renders";
-import isHotkey from "is-hotkey";
 
 export type CustomText = {
   text: string;
@@ -32,6 +41,7 @@ export type CustomText = {
   code?: true;
   italic?: true;
   underline?: true;
+  strikethrough?: true;
 };
 
 export type CustomElement = {
@@ -65,9 +75,26 @@ const HOTKEYS = {
   "mod+i": "italic",
   "mod+u": "underline",
   "mod+`": "code",
+  "mod+s": "strikethrough",
 } as const;
 
 const initialValue: Descendant[] = [
+  {
+    type: "paragraph",
+    children: [
+      {
+        text: "Press `space` for AI, '/' for commands...",
+      },
+    ],
+  },
+  {
+    type: "paragraph",
+    children: [
+      {
+        text: "Press `space` for AI, '/' for commands...",
+      },
+    ],
+  },
   {
     type: "paragraph",
     children: [
@@ -88,9 +115,25 @@ export const SlateEditor = () => {
     []
   );
   const [editor] = useState(() => withReact(createEditor()));
+  const selection = useSelection();
 
   return (
     <Slate editor={editor} value={initialValue}>
+      {/* 
+        TODO: Toolbar only available when text highlighted 
+        TODO: takes the editor.selection and style his position with offset: number and path [number, number]
+        TODO: also takes the highlighted selection and transformed depending on option choosed
+        TODO: the only way to make toolbar dissapear is by move cursor of selecting text or click outside toolbar
+      */}
+      {selection && (
+        <Toolbar className="relative flex w-fit items-center overflow-hidden rounded-lg bg-gray-900/5 shadow-md">
+          <MarkButton type="bold" Icon={Bold} />
+          <MarkButton type="italic" Icon={Italic} />
+          <MarkButton type="underline" Icon={Underline} />
+          <MarkButton type="strikethrough" Icon={Strikethrough} />
+          <MarkButton type="code" Icon={Code} />
+        </Toolbar>
+      )}
       <Editable
         renderElement={renderElement}
         renderLeaf={renderLeaf}
@@ -176,26 +219,49 @@ export const toggleBlock = (editor: Editor, type: CustomElement["type"]) => {
   }
 };
 
+const MarkButton = ({ type, Icon }: { type: TextType; Icon: LucideIcon }) => {
+  const editor = useSlate();
+  return (
+    <Button
+      className="h-full w-full border-gray-500/5 px-2 py-2 transition-all duration-100 hover:border-x-2 hover:bg-gray-200"
+      active={isMarkActive(editor, type)}
+      onMouseDown={(e: MouseEvent) => {
+        e.preventDefault();
+        toggleMark(editor, type);
+      }}
+    >
+      {<Icon className="h-4 w-4 stroke-gray-800 stroke-2" />}
+    </Button>
+  );
+};
+
 type BaseProps = {
   className: string;
   children: ReactNode;
+  active: boolean
   [key: string]: unknown;
 };
 
 export const Toolbar = forwardRef(
-  ({ className, ...props }: BaseProps, ref: Ref<HTMLDivElement>) => (
-    <Menu className={className} {...props} ref={ref} />
+  ({ className, children, ...props }: BaseProps, ref: Ref<HTMLDivElement>) => (
+    <Menu className={className} {...props} ref={ref}>
+      {children}
+    </Menu>
   )
 );
 
 export const Button = forwardRef(
-  (props: BaseProps, ref: LegacyRef<HTMLSpanElement>) => (
-    <span {...props} ref={ref} />
+  ({ children, active, ...props }: BaseProps, ref: Ref<HTMLButtonElement>) => (
+    <button {...props} ref={ref} style={{color: active ? "blue" : "black" }}>
+      {children}
+    </button>
   )
 );
 
 export const Menu = forwardRef(
-  ({ className, ...props }: BaseProps, ref: Ref<HTMLDivElement>) => (
-    <div className={className} {...props} data-test-id="menu" ref={ref} />
+  ({ className, children, ...props }: BaseProps, ref: Ref<HTMLDivElement>) => (
+    <div className={className} {...props} data-test-id="menu" ref={ref}>
+      {children}
+    </div>
   )
 );

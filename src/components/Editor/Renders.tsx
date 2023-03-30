@@ -48,5 +48,9 @@ export const RenderLeaf = ({ attributes, children, leaf }: RenderLeafProps) => {
     children = <u>{children}</u>;
   }
 
+  if (leaf.strikethrough) {
+    children = <del>{children}</del>;
+  }
+
   return <span {...attributes}>{children}</span>;
 };

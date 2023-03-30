@@ -95,6 +95,7 @@ const NoteBanner: FC<NoteBannerProp> = ({ isLoading }) => {
         src={notesBg}
         width={1640}
         height={270}
+        priority
         alt={`This is the background for the note`}
       />
     </picture>
