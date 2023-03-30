@@ -3,8 +3,16 @@ import isHotkey from "is-hotkey";
 import {
   Bold,
   Code,
+  Heading1,
+  Heading2,
+  Heading3,
   Italic,
+  LayoutList,
+  List,
+  ListOrdered,
+  Quote,
   Strikethrough,
+  Type,
   Underline,
   type LucideIcon,
 } from "lucide-react";
@@ -15,6 +23,7 @@ import {
   useMemo,
   type ReactNode,
   type Ref,
+  useState,
 } from "react";
 import {
   Editor,
@@ -107,35 +116,9 @@ const initialValue: Descendant[] = [
   },
 ];
 
-type MemoEditableProps = {
-  editor: Editor;
-  renderElement: (props: RenderElementProps) => JSX.Element;
-  renderLeaf: (props: RenderLeafProps) => JSX.Element;
-};
-
-export const MemoEditable = memo(
-  ({ editor, renderElement, renderLeaf }: MemoEditableProps) => {
-    return (
-      <Editable
-        renderElement={renderElement}
-        renderLeaf={renderLeaf}
-        onKeyDown={(e) => {
-          for (const hotkey in HOTKEYS) {
-            if (isHotkey(hotkey, e)) {
-              e.stopPropagation();
-              e.preventDefault();
-              const mark = HOTKEYS[hotkey as keyof typeof HOTKEYS];
-              toggleMark(editor, mark);
-            }
-          }
-        }}
-      />
-    );
-  }
-);
-
 export const SlateEditor = () => {
   const selection = useSelection();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const renderElement = useCallback(
     (props: RenderElementProps) => <RenderElement {...props} />,
@@ -157,9 +140,7 @@ export const SlateEditor = () => {
         TODO: the only way to make toolbar dissapear is by move cursor of selecting text or click outside toolbar
       */}
       {selection && (
-        <Toolbar
-          className={`relative flex w-fit items-center overflow-hidden rounded-lg bg-gray-900/5 shadow-md`}
-        >
+        <Toolbar className="relative flex w-fit items-center overflow-hidden rounded-lg  border border-gray-900/5 shadow-lg shadow-gray-300 transition-all duration-200">
           <MarkButton type="bold" Icon={Bold} />
           <MarkButton type="italic" Icon={Italic} />
           <MarkButton type="underline" Icon={Underline} />
@@ -167,14 +148,102 @@ export const SlateEditor = () => {
           <MarkButton type="code" Icon={Code} />
         </Toolbar>
       )}
+      {isMenuOpen && (
+        <Toolbar className="duration-2000 relative flex max-h-[400px] w-fit flex-col overflow-y-scroll scroll-smooth rounded-lg  border border-gray-900/5 p-1 shadow-lg shadow-gray-300 transition-all">
+          {/* <p className="text-gray-900/60 text-xs font-medium px-4">Basic blocks</p>s */}
+          <BlockButton
+            type="paragraph"
+            title="Text"
+            subTitle="Just start writing with plain text."
+            Icon={Type}
+          />
+          <BlockButton
+            type="list-item"
+            title="To-do List"
+            subTitle="Track tasks with a to-do list."
+            Icon={LayoutList}
+          />
+          <BlockButton
+            type="heading-one"
+            title="Heading 1"
+            subTitle="Big section heading."
+            Icon={Heading1}
+          />
+          <BlockButton
+            type="heading-two"
+            title="Heading 2"
+            subTitle="Medium section heading."
+            Icon={Heading2}
+          />
+          <BlockButton
+            type="heading-three"
+            title="Heading 3"
+            subTitle="Small section heading."
+            Icon={Heading3}
+          />
+          <BlockButton
+            type="bulleted-list"
+            title="Bulleted List"
+            subTitle="Create a simple bulleted list."
+            Icon={List}
+          />
+          <BlockButton
+            type="numbered-list"
+            title="Numbered List"
+            subTitle="Create a list with numbering."
+            Icon={ListOrdered}
+          />
+          <BlockButton
+            type="block-quote"
+            title="Qoute"
+            subTitle="Capture a quote."
+            Icon={Quote}
+          />
+        </Toolbar>
+      )}
       <MemoEditable
         editor={editor}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
+        setIsMenuOpen={setIsMenuOpen}
       />
     </Slate>
   );
 };
+
+type MemoEditableProps = {
+  editor: Editor;
+  renderElement: (props: RenderElementProps) => JSX.Element;
+  renderLeaf: (props: RenderLeafProps) => JSX.Element;
+  setIsMenuOpen: (isMenuOpen: boolean) => void;
+};
+
+const MemoEditable = memo(
+  ({ editor, renderElement, renderLeaf, setIsMenuOpen }: MemoEditableProps) => {
+    return (
+      <Editable
+        renderElement={renderElement}
+        renderLeaf={renderLeaf}
+        onKeyDown={(e) => {
+          for (const hotkey in HOTKEYS) {
+            if (isHotkey(hotkey, e)) {
+              e.stopPropagation();
+              e.preventDefault();
+              const mark = HOTKEYS[hotkey as keyof typeof HOTKEYS];
+              toggleMark(editor, mark);
+            }
+          }
+          if (isHotkey("mod+/", e)) {
+            setIsMenuOpen(true);
+          }
+          if (isHotkey("Escape", e)) {
+            setIsMenuOpen(false);
+          }
+        }}
+      />
+    );
+  }
+);
 
 type TextType = keyof Omit<CustomText, "text">;
 
@@ -183,7 +252,7 @@ const isMarkActive = (editor: Editor, textType: TextType) => {
   return marks ? marks[textType] === true : false;
 };
 
-export const toggleMark = (editor: Editor, textType: TextType) => {
+const toggleMark = (editor: Editor, textType: TextType) => {
   const isActive = isMarkActive(editor, textType);
 
   if (isActive) {
@@ -210,7 +279,7 @@ const isBlockActive = (editor: Editor, type: string, blockType = "type") => {
   return !!match;
 };
 
-export const toggleBlock = (editor: Editor, type: CustomElement["type"]) => {
+const toggleBlock = (editor: Editor, type: CustomElement["type"]) => {
   const isActive = isBlockActive(
     editor,
     type,
@@ -256,11 +325,47 @@ const MarkButton = memo(
           toggleMark(editor, type);
         }}
       >
-        {<Icon className="h-4 w-4 stroke-gray-800 stroke-2" />}
+        <Icon className="h-4 w-4 stroke-gray-800 stroke-2" />
       </Button>
     );
   }
 );
+
+const BlockButton = ({
+  type,
+  title,
+  subTitle,
+  Icon,
+}: {
+  type: CustomElement["type"];
+  title: string;
+  subTitle: string;
+  Icon: LucideIcon;
+}) => {
+  const editor = useSlate();
+  return (
+    <Button
+      className="group flex gap-2 px-3 py-1 transition-colors duration-200 hover:bg-gray-100"
+      active={isBlockActive(
+        editor,
+        type,
+        TEXT_ALIGN_TYPES.includes(type) ? "align" : "type"
+      )}
+      onMouseDown={(e: MouseEvent) => {
+        e.preventDefault();
+        toggleBlock(editor, type);
+      }}
+    >
+      <div className="m-auto rounded-lg border border-gray-900/25 transition-colors duration-200 group-hover:bg-white">
+        <Icon className="h-12 w-12 stroke-gray-700 p-2" />
+      </div>
+      <div className="flex flex-1 flex-col items-start justify-center">
+        <h3 className="text-sm font-medium text-gray-900/80">{title}</h3>
+        <span className="text-xs font-light text-gray-900/60">{subTitle}</span>
+      </div>
+    </Button>
+  );
+};
 
 type BaseProps = {
   className: string;
@@ -269,7 +374,7 @@ type BaseProps = {
   [key: string]: unknown;
 };
 
-export const Toolbar = memo(
+const Toolbar = memo(
   forwardRef(
     (
       { className, children, ...props }: BaseProps,
@@ -282,7 +387,7 @@ export const Toolbar = memo(
   )
 );
 
-export const Button = memo(
+const Button = memo(
   forwardRef(
     (
       { children, active, ...props }: BaseProps,
@@ -295,9 +400,9 @@ export const Button = memo(
   )
 );
 
-export const Menu = forwardRef(
+const Menu = forwardRef(
   ({ className, children, ...props }: BaseProps, ref: Ref<HTMLDivElement>) => (
-    <div className={className} {...props} data-test-id="menu" ref={ref}>
+    <div className={className} {...props} ref={ref}>
       {children}
     </div>
   )
