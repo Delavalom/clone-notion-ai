@@ -93,23 +93,7 @@ const initialValue: Descendant[] = [
     children: [
       // these are Text
       {
-        text: "Press `space` for AI, '/' for commands...",
-      },
-    ],
-  },
-  {
-    type: "paragraph",
-    children: [
-      {
-        text: "Press `space` for AI, '/' for commands...",
-      },
-    ],
-  },
-  {
-    type: "paragraph",
-    children: [
-      {
-        text: "Press `space` for AI, '/' for commands...",
+        text: ""
       },
     ],
   },
@@ -218,6 +202,7 @@ const MemoEditable = memo(
         renderLeaf={renderLeaf}
         spellCheck
         autoFocus
+        placeholder="Press command or ctrl + `space` for AI, command or ctrl + '/' for block actions..."
         onKeyDown={(e) => {
           for (const hotkey in HOTKEYS) {
             if (isHotkey(hotkey, e)) {

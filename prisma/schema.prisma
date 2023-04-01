@@ -10,7 +10,7 @@ generator client {
 model Note {
   id        String   @id @default(uuid())
   title     String   @default("untitled")
-  body      String
+  body      Element[]
   userId    String   @map("user_id")
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
@@ -71,4 +71,24 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verificationtokens")
+}
+
+model Element {
+  id Int @id @default(autoincrement())
+  type String @default("paragraph")
+  text Text[]
+  note Note @relation(fields: [noteId], references: [id])
+  noteId String
+}
+
+model Text {
+  id Int @id @default(autoincrement())
+  text String
+  bold Boolean?
+  code Boolean?
+  italic Boolean?
+  underline Boolean?
+  strikethrough Boolean?
+  element Element @relation(fields: [elementId], references: [id])
+  elementId Int
 }
