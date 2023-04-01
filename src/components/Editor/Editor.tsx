@@ -20,6 +20,7 @@ import {
   useCallback,
   useMemo,
   useState,
+  type CSSProperties,
   type ReactNode,
   type Ref,
 } from "react";
@@ -29,7 +30,8 @@ import {
   Transforms,
   createEditor,
   type BaseEditor,
-  type Descendant,
+  type BasePoint,
+  type Descendant
 } from "slate";
 import { withHistory } from "slate-history";
 import {
@@ -93,7 +95,7 @@ const initialValue: Descendant[] = [
     children: [
       // these are Text
       {
-        text: ""
+        text: "",
       },
     ],
   },
@@ -102,6 +104,7 @@ const initialValue: Descendant[] = [
 export const SlateEditor = () => {
   const selection = useSelection();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [anchor, setAnchor] = useState<BasePoint | undefined>(undefined);
 
   const renderElement = useCallback(
     (props: RenderElementProps) => <RenderElement {...props} />,
@@ -123,7 +126,14 @@ export const SlateEditor = () => {
         TODO: the only way to make toolbar dissapear is by move cursor of selecting text or click outside toolbar. ✅ DONE
       */}
       {selection && (
-        <Toolbar className="relative flex w-fit items-center overflow-hidden rounded-lg  border border-gray-900/5 shadow-lg shadow-gray-300 transition-all duration-200">
+        <Toolbar
+          style={{
+            position: "absolute",
+            left: `${(anchor?.offset  ?? 0) * 13}px`,
+            top: `${(anchor?.path[0]  ?? 0) * 220}px`,
+          }}
+          className="z-50 bg-white flex w-fit items-center overflow-hidden rounded-lg  border border-gray-900/5 shadow-sm shadow-gray-300 transition-all duration-200"
+        >
           <MarkButton type="bold" Icon={Bold} />
           <MarkButton type="italic" Icon={Italic} />
           <MarkButton type="underline" Icon={Underline} />
@@ -132,7 +142,14 @@ export const SlateEditor = () => {
         </Toolbar>
       )}
       {isMenuOpen && (
-        <Toolbar className="relative flex max-h-[400px] w-fit flex-col overflow-y-scroll scroll-smooth rounded-lg border border-gray-900/5 p-1 shadow-lg shadow-gray-300 transition-all duration-200">
+        <Toolbar
+          style={{
+            position: "absolute",
+            left: `${(anchor?.offset ?? 0) * 13}px`,
+            top: `${(anchor?.path[0] ?? 0) * 220}px`,
+          }}
+          className="z-50 bg-white flex max-h-[400px] w-fit flex-col overflow-y-scroll scroll-smooth rounded-lg border border-gray-900/5 p-1 shadow-sm shadow-gray-300 transition-all duration-200"
+        >
           <BlockOption
             type="paragraph"
             title="Text"
@@ -182,6 +199,7 @@ export const SlateEditor = () => {
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         setIsMenuOpen={setIsMenuOpen}
+        setAnchor={setAnchor}
       />
     </Slate>
   );
@@ -192,10 +210,17 @@ type MemoEditableProps = {
   renderElement: (props: RenderElementProps) => JSX.Element;
   renderLeaf: (props: RenderLeafProps) => JSX.Element;
   setIsMenuOpen: (isMenuOpen: boolean) => void;
+  setAnchor: (anchor: BasePoint | undefined) => void;
 };
 
 const MemoEditable = memo(
-  ({ editor, renderElement, renderLeaf, setIsMenuOpen }: MemoEditableProps) => {
+  ({
+    editor,
+    renderElement,
+    renderLeaf,
+    setIsMenuOpen,
+    setAnchor,
+  }: MemoEditableProps) => {
     return (
       <Editable
         renderElement={renderElement}
@@ -217,7 +242,7 @@ const MemoEditable = memo(
           if (isHotkey("Escape", e)) {
             setIsMenuOpen(false);
           }
-          console.log(editor.selection)
+          setAnchor(editor.selection?.anchor);
         }}
       />
     );
@@ -333,6 +358,7 @@ const BlockOption = ({
 type BaseProps = {
   className: string;
   children: ReactNode;
+  style: CSSProperties;
   active?: boolean;
   [key: string]: unknown;
 };
@@ -344,10 +370,10 @@ type BaseProps = {
 const Toolbar = memo(
   forwardRef(
     (
-      { className, children, ...props }: BaseProps,
+      { className, children, style, ...props }: BaseProps,
       ref: Ref<HTMLDivElement>
     ) => (
-      <Menu className={className} {...props} ref={ref}>
+      <Menu style={style} className={className} {...props} ref={ref}>
         {children}
       </Menu>
     )
@@ -375,10 +401,10 @@ const Button = memo(
 const Menu = memo(
   forwardRef(
     (
-      { className, children, ...props }: BaseProps,
+      { className, children, style, ...props }: BaseProps,
       ref: Ref<HTMLDivElement>
     ) => (
-      <div className={className} {...props} ref={ref}>
+      <div style={style} className={className} {...props} ref={ref}>
         {children}
       </div>
     )

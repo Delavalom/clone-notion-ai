@@ -14,9 +14,6 @@ export const noteRouter = router({
         where: {
           id: input.id,
         },
-        include: {
-          
-        }
       });
       if (!note) {
         throw new TRPCError({

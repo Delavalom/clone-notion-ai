@@ -83,7 +83,7 @@ model Element {
 
 model Text {
   id Int @id @default(autoincrement())
-  text String
+  text String @default("")
   bold Boolean?
   code Boolean?
   italic Boolean?
