@@ -60,11 +60,14 @@ export type CustomElement = {
     | "block-quote"
     | "heading-one"
     | "heading-two"
-    | "heading-three";
+    | "heading-three"
+    | "list-item"
+    | "numbered-list";
   level?: 1 | 2 | 3;
   align?: string;
   children: CustomText[];
 };
+// add later the blockoptions for list-item and numbered-list
 
 declare module "slate" {
   interface CustomTypes {
@@ -282,7 +285,7 @@ const toggleBlock = (editor: Editor, type: CustomElement["type"]) => {
     type: isActive ? "paragraph" : type,
   });
 
-  if (!isActive) {
+  if (!isActive && type === "bulleted-list") {
     const block = {
       type,
       children: [],

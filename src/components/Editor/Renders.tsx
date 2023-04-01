@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { type RenderElementProps, type RenderLeafProps } from "slate-react";
 
 export const RenderElement = ({
@@ -5,60 +6,144 @@ export const RenderElement = ({
   attributes,
   children,
 }: RenderElementProps) => {
-  let className: string;
+  let style: CSSProperties = {
+    display: "inline-block",
+    fontSize: "1rem",
+    lineHeight: "1rem",
+    backgroundColor: "transparent",
+    borderLeft: 0,
+    margin: 0,
+    padding: 0,
+    quotes: "none",
+  };
+
   switch (element.type) {
     case "block-quote":
-      className = "blockquote";
+      style = {
+        display: "inline-block",
+        fontSize: "1rem",
+        lineHeight: "1rem",
+        backgroundColor: "#f9f9f9",
+        borderLeft: "10px solid #ccc",
+        margin: "1.5em 10px",
+        padding: "0.5em 10px",
+        quotes: `"\x811D""\x8118""\x8119"`,
+      };
       break;
 
     case "bulleted-list":
-      className = "list-item";
+      style = {
+        display: "list-item",
+        fontSize: "1rem",
+        lineHeight: "1rem",
+        backgroundColor: "transparent",
+        borderLeft: 0,
+        margin: 0,
+        padding: 0,
+        quotes: "none",
+      };
       break;
 
     case "heading-one":
-      className = "text-3xl";
+      style = {
+        display: "inline-block",
+        fontSize: "1.875rem",
+        lineHeight: "2.25rem",
+        backgroundColor: "transparent",
+        borderLeft: 0,
+        margin: 0,
+        padding: 0,
+        quotes: "none",
+      };
       break;
 
     case "heading-two":
-      className = "text-2xl";
+      style = {
+        display: "inline-block",
+        fontSize: "1.5rem",
+        lineHeight: "2rem",
+        backgroundColor: "transparent",
+        borderLeft: 0,
+        margin: 0,
+        padding: 0,
+        quotes: "none",
+      };
       break;
 
     case "heading-three":
-      className = "text-xl";
-      break;
-
-    default:
-      className = "";
+      style = {
+        display: "inline-block",
+        fontSize: "1.25rem",
+        lineHeight: "1.75rem",
+        backgroundColor: "transparent",
+        borderLeft: 0,
+        margin: 0,
+        padding: 0,
+        quotes: "none",
+      };
       break;
   }
   return (
-    <div className={className} {...attributes}>
+    <div style={style} {...attributes}>
       {children}
     </div>
   );
+
+  // switch (element.type) {
+  //   case "block-quote":
+  //     return <blockquote {...attributes}>{children}</blockquote>;
+
+  //   case "bulleted-list":
+  //     return <ul {...attributes}>{children}</ul>;
+
+  //   case "heading-one":
+  //     return <h1 {...attributes}>{children}</h1>;
+
+  //   case "heading-two":
+  //     return <h2 {...attributes}>{children}</h2>;
+  
+  //   case "heading-three":
+  //     return <h3 {...attributes}>{children}</h3>;
+  
+      // case 'list-item':
+        //   return (
+        //     <li style={style} {...attributes}>
+        //       {children}
+        //     </li>
+        //   )
+        // case 'numbered-list':
+        //   return (
+        //     <ol style={style} {...attributes}>
+        //       {children}
+        //     </ol>
+        //   )
+
+  //   default:
+  //     return <p {...attributes}>{children}</p>;
+  // }
+
 };
 
 export const RenderLeaf = ({ attributes, children, leaf }: RenderLeafProps) => {
-  // Edit this to a React.cssProperties Object and toggle active properties and inactive properties
-  let className: string
-
   if (leaf.bold) {
-    className = "font-bold";
-  } else if (leaf.code) {
-    className = "bg-gray-300";
-  } else if (leaf.italic) {
-    className = "italic";
-  } else if (leaf.underline) {
-    className = "underline";
-  } else if (leaf.strikethrough) {
-    className = "line-through";
-  } else {
-    className = "";
+    children = <strong>{children}</strong>;
   }
 
-  return (
-    <div className={className} {...attributes}>
-      {children}
-    </div>
-  );
+  if (leaf.code) {
+    children = <code className="bg-gray-300">{children}</code>
+  }
+
+  if (leaf.italic) {
+    children = <em>{children}</em>;
+  }
+
+  if (leaf.underline) {
+    children = <u>{children}</u>;
+  }
+
+  if (leaf.strikethrough) {
+    children = <del>{children}</del>;
+  }
+
+  return <span {...attributes}>{children}</span>;
 };
