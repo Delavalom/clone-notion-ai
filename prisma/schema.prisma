@@ -7,18 +7,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Note {
-  id        String   @id @default(uuid())
-  title     String   @default("untitled")
-  body      Element[]
-  userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("notes")
-}
-
 model Account {
   id                       String  @id @default(cuid())
   userId                   String  @map("user_id")
@@ -50,6 +38,15 @@ model Session {
   @@map("sessions")
 }
 
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
 model User {
   id            String    @id @default(cuid())
   username      String?
@@ -64,13 +61,16 @@ model User {
   @@map("users")
 }
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
+model Note {
+  id        String   @id @default(uuid())
+  title     String   @default("untitled")
+  body      Element[]
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@unique([identifier, token])
-  @@map("verificationtokens")
+  @@map("notes")
 }
 
 model Element {
@@ -78,7 +78,7 @@ model Element {
   type String @default("paragraph")
   text Text[]
   note Note @relation(fields: [noteId], references: [id])
-  noteId String
+  noteId String @map("note_id")
 }
 
 model Text {
@@ -90,5 +90,5 @@ model Text {
   underline Boolean?
   strikethrough Boolean?
   element Element @relation(fields: [elementId], references: [id])
-  elementId Int
+  elementId Int @map("element_id")
 }

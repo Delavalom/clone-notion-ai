@@ -217,6 +217,7 @@ const MemoEditable = memo(
           if (isHotkey("Escape", e)) {
             setIsMenuOpen(false);
           }
+          console.log(editor.selection)
         }}
       />
     );

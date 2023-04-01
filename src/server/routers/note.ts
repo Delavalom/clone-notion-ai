@@ -10,11 +10,13 @@ export const noteRouter = router({
   getNote: protectedProcedure
     .input(z.object({ id: z.string().uuid().min(1) }))
     .query(async ({ ctx, input }) => {
-      // if (z.coerce.string(input.id).uuid())
       const note = await ctx.prisma.note.findUnique({
         where: {
           id: input.id,
         },
+        include: {
+          
+        }
       });
       if (!note) {
         throw new TRPCError({
