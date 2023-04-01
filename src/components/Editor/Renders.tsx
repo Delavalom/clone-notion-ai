@@ -5,52 +5,60 @@ export const RenderElement = ({
   attributes,
   children,
 }: RenderElementProps) => {
+  let className: string;
   switch (element.type) {
     case "block-quote":
-      return <blockquote {...attributes}>{children}</blockquote>;
+      className = "blockquote";
+      break;
 
     case "bulleted-list":
-      return <ul {...attributes}>{children}</ul>;
+      className = "list-item";
+      break;
 
     case "heading-one":
-      return <h1 {...attributes}>{children}</h1>;
+      className = "text-3xl";
+      break;
 
     case "heading-two":
-      return <h2 {...attributes}>{children}</h2>;
+      className = "text-2xl";
+      break;
+
     case "heading-three":
-      return <h3 {...attributes}>{children}</h3>;
-
-    case "list-item":
-      return <li {...attributes}>{children}</li>;
-
-    case "numbered-list":
-      return <ol {...attributes}>{children}</ol>;
+      className = "text-xl";
+      break;
 
     default:
-      return <p {...attributes}>{children}</p>;
+      className = "";
+      break;
   }
+  return (
+    <div className={className} {...attributes}>
+      {children}
+    </div>
+  );
 };
 
 export const RenderLeaf = ({ attributes, children, leaf }: RenderLeafProps) => {
+  // Edit this to a React.cssProperties Object and toggle active properties and inactive properties
+  let className: string
+
   if (leaf.bold) {
-    children = <strong>{children}</strong>;
+    className = "font-bold";
+  } else if (leaf.code) {
+    className = "bg-gray-300";
+  } else if (leaf.italic) {
+    className = "italic";
+  } else if (leaf.underline) {
+    className = "underline";
+  } else if (leaf.strikethrough) {
+    className = "line-through";
+  } else {
+    className = "";
   }
 
-  if (leaf.code) {
-    children = <code className="bg-gray-300">{children}</code>
-  }
-
-  if (leaf.italic) {
-    children = <em>{children}</em>;
-  }
-
-  if (leaf.underline) {
-    children = <u>{children}</u>;
-  }
-
-  if (leaf.strikethrough) {
-    children = <del>{children}</del>;
-  }
-
-  return <span {...attributes}>{children}</span>;
+  return (
+    <div className={className} {...attributes}>
+      {children}
+    </div>
+  );
 };

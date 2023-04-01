@@ -7,9 +7,7 @@ import {
   Heading2,
   Heading3,
   Italic,
-  LayoutList,
   List,
-  ListOrdered,
   Quote,
   Strikethrough,
   Type,
@@ -21,9 +19,9 @@ import {
   memo,
   useCallback,
   useMemo,
+  useState,
   type ReactNode,
   type Ref,
-  useState,
 } from "react";
 import {
   Editor,
@@ -62,9 +60,7 @@ export type CustomElement = {
     | "block-quote"
     | "heading-one"
     | "heading-two"
-    | "heading-three"
-    | "list-item"
-    | "numbered-list";
+    | "heading-three";
   level?: 1 | 2 | 3;
   align?: string;
   children: CustomText[];
@@ -78,21 +74,21 @@ declare module "slate" {
   }
 }
 
-const LIST_TYPES = ["numbered-list", "bulleted-list"];
-const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"];
-
 const HOTKEYS = {
   "mod+b": "bold",
   "mod+i": "italic",
   "mod+u": "underline",
-  "mod+`": "code",
+  "mod+e": "code",
   "mod+s": "strikethrough",
 } as const;
 
 const initialValue: Descendant[] = [
+  // these are the Nodes
   {
+    // these are Elements
     type: "paragraph",
     children: [
+      // these are Text
       {
         text: "Press `space` for AI, '/' for commands...",
       },
@@ -134,10 +130,10 @@ export const SlateEditor = () => {
   return (
     <Slate editor={editor} value={initialValue}>
       {/* 
-        TODO: Toolbar only available when text highlighted 
+        TODO: Toolbar only available when text highlighted. ✅ DONE
         TODO: takes the editor.selection and style his position with offset: number and path [number, number]
-        TODO: also takes the highlighted selection and transformed depending on option choosed
-        TODO: the only way to make toolbar dissapear is by move cursor of selecting text or click outside toolbar
+        TODO: also takes the highlighted selection and transformed depending on option choosed. ✅ DONE
+        TODO: the only way to make toolbar dissapear is by move cursor of selecting text or click outside toolbar. ✅ DONE
       */}
       {selection && (
         <Toolbar className="relative flex w-fit items-center overflow-hidden rounded-lg  border border-gray-900/5 shadow-lg shadow-gray-300 transition-all duration-200">
@@ -149,55 +145,48 @@ export const SlateEditor = () => {
         </Toolbar>
       )}
       {isMenuOpen && (
-        <Toolbar className="duration-2000 relative flex max-h-[400px] w-fit flex-col overflow-y-scroll scroll-smooth rounded-lg  border border-gray-900/5 p-1 shadow-lg shadow-gray-300 transition-all">
-          {/* <p className="text-gray-900/60 text-xs font-medium px-4">Basic blocks</p>s */}
-          <BlockButton
+        <Toolbar className="relative flex max-h-[400px] w-fit flex-col overflow-y-scroll scroll-smooth rounded-lg border border-gray-900/5 p-1 shadow-lg shadow-gray-300 transition-all duration-200">
+          <BlockOption
             type="paragraph"
             title="Text"
             subTitle="Just start writing with plain text."
             Icon={Type}
+            setIsMenuOpen={setIsMenuOpen}
           />
-          <BlockButton
-            type="list-item"
-            title="To-do List"
-            subTitle="Track tasks with a to-do list."
-            Icon={LayoutList}
-          />
-          <BlockButton
+          <BlockOption
             type="heading-one"
             title="Heading 1"
             subTitle="Big section heading."
             Icon={Heading1}
+            setIsMenuOpen={setIsMenuOpen}
           />
-          <BlockButton
+          <BlockOption
             type="heading-two"
             title="Heading 2"
             subTitle="Medium section heading."
             Icon={Heading2}
+            setIsMenuOpen={setIsMenuOpen}
           />
-          <BlockButton
+          <BlockOption
             type="heading-three"
             title="Heading 3"
             subTitle="Small section heading."
             Icon={Heading3}
+            setIsMenuOpen={setIsMenuOpen}
           />
-          <BlockButton
+          <BlockOption
             type="bulleted-list"
             title="Bulleted List"
             subTitle="Create a simple bulleted list."
             Icon={List}
+            setIsMenuOpen={setIsMenuOpen}
           />
-          <BlockButton
-            type="numbered-list"
-            title="Numbered List"
-            subTitle="Create a list with numbering."
-            Icon={ListOrdered}
-          />
-          <BlockButton
+          <BlockOption
             type="block-quote"
-            title="Qoute"
+            title="Quote"
             subTitle="Capture a quote."
             Icon={Quote}
+            setIsMenuOpen={setIsMenuOpen}
           />
         </Toolbar>
       )}
@@ -224,10 +213,11 @@ const MemoEditable = memo(
       <Editable
         renderElement={renderElement}
         renderLeaf={renderLeaf}
+        spellCheck
+        autoFocus
         onKeyDown={(e) => {
           for (const hotkey in HOTKEYS) {
             if (isHotkey(hotkey, e)) {
-              e.stopPropagation();
               e.preventDefault();
               const mark = HOTKEYS[hotkey as keyof typeof HOTKEYS];
               toggleMark(editor, mark);
@@ -262,7 +252,7 @@ const toggleMark = (editor: Editor, textType: TextType) => {
   }
 };
 
-const isBlockActive = (editor: Editor, type: string, blockType = "type") => {
+const isBlockActive = (editor: Editor, type: string) => {
   const { selection } = editor;
   if (!selection) return false;
 
@@ -270,9 +260,7 @@ const isBlockActive = (editor: Editor, type: string, blockType = "type") => {
     Editor.nodes(editor, {
       at: Editor.unhangRange(editor, selection),
       match: (n) =>
-        !Editor.isEditor(n) &&
-        SlateElement.isElement(n) &&
-        n[blockType as keyof CustomElement] === type,
+        !Editor.isEditor(n) && SlateElement.isElement(n) && n["type"] === type,
     })
   );
 
@@ -280,35 +268,25 @@ const isBlockActive = (editor: Editor, type: string, blockType = "type") => {
 };
 
 const toggleBlock = (editor: Editor, type: CustomElement["type"]) => {
-  const isActive = isBlockActive(
-    editor,
-    type,
-    TEXT_ALIGN_TYPES.includes(type) ? "align" : "type"
-  );
-  const isList = LIST_TYPES.includes(type);
+  const isActive = isBlockActive(editor, type);
 
   Transforms.unwrapNodes(editor, {
     match: (n) =>
       !Editor.isEditor(n) &&
       SlateElement.isElement(n) &&
-      LIST_TYPES.includes(n.type) &&
-      !TEXT_ALIGN_TYPES.includes(type),
+      n["type"] === "bulleted-list",
     split: true,
   });
-  let newProperties: Partial<SlateElement>;
-  if (TEXT_ALIGN_TYPES.includes(type)) {
-    newProperties = {
-      align: isActive ? undefined : type,
-    };
-  } else {
-    newProperties = {
-      type: isActive ? "paragraph" : isList ? "list-item" : type,
-    };
-  }
-  Transforms.setNodes<SlateElement>(editor, newProperties);
 
-  if (!isActive && isList) {
-    const block = { type, children: [] };
+  Transforms.setNodes<SlateElement>(editor, {
+    type: isActive ? "paragraph" : type,
+  });
+
+  if (!isActive) {
+    const block = {
+      type,
+      children: [],
+    };
     Transforms.wrapNodes(editor, block);
   }
 };
@@ -331,38 +309,34 @@ const MarkButton = memo(
   }
 );
 
-const BlockButton = ({
+const BlockOption = ({
   type,
   title,
   subTitle,
   Icon,
+  setIsMenuOpen,
 }: {
   type: CustomElement["type"];
   title: string;
   subTitle: string;
   Icon: LucideIcon;
+  setIsMenuOpen: (isModalOpen: boolean) => void;
 }) => {
   const editor = useSlate();
   return (
     <Button
-      className="group flex gap-2 px-3 py-1 transition-colors duration-200 hover:bg-gray-100"
-      active={isBlockActive(
-        editor,
-        type,
-        TEXT_ALIGN_TYPES.includes(type) ? "align" : "type"
-      )}
-      onMouseDown={(e: MouseEvent) => {
+      className="button-block group gap-1 rounded-lg px-3 py-1 text-left transition-colors duration-200 hover:bg-gray-100"
+      onClick={(e: MouseEvent) => {
         e.preventDefault();
         toggleBlock(editor, type);
+        setIsMenuOpen(false);
       }}
     >
-      <div className="m-auto rounded-lg border border-gray-900/25 transition-colors duration-200 group-hover:bg-white">
-        <Icon className="h-12 w-12 stroke-gray-700 p-2" />
-      </div>
-      <div className="flex flex-1 flex-col items-start justify-center">
-        <h3 className="text-sm font-medium text-gray-900/80">{title}</h3>
-        <span className="text-xs font-light text-gray-900/60">{subTitle}</span>
-      </div>
+      <Icon className="icon my-auto h-16 w-16 rounded-lg border border-gray-900/25 stroke-gray-700 p-4 transition-colors duration-200 group-hover:bg-white" />
+      <Span className="mt-auto text-sm font-medium text-gray-900/80">
+        {title}
+      </Span>
+      <Span className="text-xs font-light text-gray-900/60">{subTitle}</Span>
     </Button>
   );
 };
@@ -370,9 +344,13 @@ const BlockButton = ({
 type BaseProps = {
   className: string;
   children: ReactNode;
-  active: boolean;
+  active?: boolean;
   [key: string]: unknown;
 };
+
+// TODO: Convert these components to custom Slate components with the useSlate() hook.
+// This hook render those components when ever the editor changes
+// https://docs.slatejs.org/concepts/09-rendering#toolbars-menus-overlays-and-more
 
 const Toolbar = memo(
   forwardRef(
@@ -393,17 +371,40 @@ const Button = memo(
       { children, active, ...props }: BaseProps,
       ref: Ref<HTMLButtonElement>
     ) => (
-      <button {...props} ref={ref} style={{ color: active ? "blue" : "black" }}>
+      <button
+        tabIndex={0}
+        {...props}
+        ref={ref}
+        style={{ color: active ? "blue" : "black" }}
+      >
         {children}
       </button>
     )
   )
 );
 
-const Menu = forwardRef(
-  ({ className, children, ...props }: BaseProps, ref: Ref<HTMLDivElement>) => (
-    <div className={className} {...props} ref={ref}>
-      {children}
-    </div>
+const Menu = memo(
+  forwardRef(
+    (
+      { className, children, ...props }: BaseProps,
+      ref: Ref<HTMLDivElement>
+    ) => (
+      <div className={className} {...props} ref={ref}>
+        {children}
+      </div>
+    )
+  )
+);
+
+const Span = memo(
+  forwardRef(
+    (
+      { className, children, ...props }: BaseProps,
+      ref: Ref<HTMLSpanElement>
+    ) => (
+      <span className={className} {...props} ref={ref}>
+        {children}
+      </span>
+    )
   )
 );
