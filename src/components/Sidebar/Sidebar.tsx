@@ -70,15 +70,13 @@ export const Sidebar: FC = () => {
           ))}
         </nav>
         <button
-          type="button"
-          id="NewNoteButton"
+          id="signOutButton"
           className="text-md flex items-center gap-2 border-y-2 border-gray-500/5 py-4 px-4 text-start text-gray-500 transition-colors duration-300 hover:bg-gray-200"
           onClick={() => signOut()}
         >
           Sign Out
         </button>
         <button
-          type="button"
           id="NewNoteButton"
           className="text-md flex items-center gap-2 border-y-2 border-gray-500/5 py-4 px-4 text-start text-gray-500 transition-colors duration-300 hover:bg-gray-200"
           onClick={() => addNewNote()}
