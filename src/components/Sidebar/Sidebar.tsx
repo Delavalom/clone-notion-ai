@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { type FC } from "react";
@@ -69,6 +69,14 @@ export const Sidebar: FC = () => {
             </ul>
           ))}
         </nav>
+        <button
+          type="button"
+          id="NewNoteButton"
+          className="text-md flex items-center gap-2 border-y-2 border-gray-500/5 py-4 px-4 text-start text-gray-500 transition-colors duration-300 hover:bg-gray-200"
+          onClick={() => signOut()}
+        >
+          Sign Out
+        </button>
         <button
           type="button"
           id="NewNoteButton"
