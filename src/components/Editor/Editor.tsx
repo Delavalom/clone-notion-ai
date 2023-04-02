@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/display-name */
+import type { Note } from "@prisma/client";
 import isHotkey from "is-hotkey";
 import {
   Bold,
@@ -19,12 +20,12 @@ import {
   forwardRef,
   memo,
   useCallback,
+  useEffect,
   useMemo,
   useState,
   type CSSProperties,
   type ReactNode,
-  type Ref,
-  useEffect,
+  type Ref
 } from "react";
 import { toast } from "react-hot-toast";
 import type { Descendant } from "slate";
@@ -49,8 +50,7 @@ import {
 import { useSelection } from "~/hooks/useSelection";
 import { api } from "~/utils/api";
 import { RenderElement, RenderLeaf } from "./Renders";
-import type { Note } from "@prisma/client";
-
+import { MenuAI } from "./ToolbarAI";
 
 export type CustomText = {
   text: string;
@@ -62,15 +62,15 @@ export type CustomText = {
 };
 
 export type CustomElement = {
-  type: 
-  | "paragraph"
-  | "bulleted-list"
-  | "block-quote"
-  | "heading-one"
-  | "heading-two"
-  | "heading-three"
-  | "list-item"
-  | "numbered-list";
+  type:
+    | "paragraph"
+    | "bulleted-list"
+    | "block-quote"
+    | "heading-one"
+    | "heading-two"
+    | "heading-three"
+    | "list-item"
+    | "numbered-list";
   level?: 1 | 2 | 3;
   align?: string;
   children: CustomText[];
@@ -97,12 +97,13 @@ export const SlateEditor = ({
   data,
   isLoading,
 }: {
-  data: {note: Note, content: unknown} | undefined;
+  data: { note: Note; content: unknown } | undefined;
   isLoading: boolean;
 }) => {
   const selection = useSelection();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [body, setBody] = useState<Descendant[]>([])
+  const [isAIMenuOpen, setIsAIMenuOpen] = useState(false);
+  const [body, setBody] = useState<Descendant[]>([]);
   const [anchor, setAnchor] = useState<BasePoint | undefined>(undefined);
   const { mutate } = api.note.updateNoteBody.useMutation({
     retry: false,
@@ -126,36 +127,35 @@ export const SlateEditor = ({
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   const handleBodyUpdate = (content: Descendant[]) => {
-    if (!data || !data.note?.id) return;
+    if (!data || !data.note?.id || !data.content) return;
 
-    mutate({ id: data.note.id, content })
-  }
+    mutate({ id: data.note.id, content });
+  };
 
-  const memoizedBody = useMemo(() => body, [body])
+  const memoizedBody = useMemo(() => body, [body]);
 
   useEffect(() => {
-    const id  = setTimeout(()=> {
-      handleBodyUpdate(memoizedBody)
-    }, 1200)
-    return () => clearTimeout(id)
-  }, [memoizedBody])
+    const id = setTimeout(() => {
+      handleBodyUpdate(memoizedBody);
+    }, 1200);
+    return () => clearTimeout(id);
+  }, [memoizedBody]);
 
-
-  if (isLoading || !data?.content) {
+  if (isLoading) {
     return <div className="skeleton h-8 w-full rounded-2xl " />;
-  }
+  } 
 
   return (
     <Slate
       editor={editor}
-      value={data.content as Descendant[]}
+      value={data?.content as Descendant[]}
       onChange={(value) => {
         const isAstChange = editor.operations.some(
           (op) => "set_selection" !== op.type
         );
         if (isAstChange) {
           // Save the value to Local Storage.
-          setBody(value)
+          setBody(value);
         }
       }}
     >
@@ -185,8 +185,8 @@ export const SlateEditor = ({
         <Toolbar
           style={{
             position: "absolute",
-            left: `${(anchor?.offset ?? 0) * 13}px`,
-            top: `${(anchor?.path[0] ?? 0) * 220}px`,
+            left: `${(anchor?.offset ?? 0) * 6 + 360}px`,
+            top: `${(anchor?.path[0] ?? 0) * 25 + 380}px`,
           }}
           className="z-50 flex max-h-[400px] w-fit flex-col overflow-y-scroll scroll-smooth rounded-lg border border-gray-900/5 bg-white p-1 shadow-sm shadow-gray-300 transition-all duration-200"
         >
@@ -234,10 +234,18 @@ export const SlateEditor = ({
           />
         </Toolbar>
       )}
+      {isAIMenuOpen && (
+        <MenuAI style={{
+          position: "absolute",
+          left: `${(anchor?.offset ?? 0) * 6 + 360}px`,
+          top: `${(anchor?.path[0] ?? 0) * 25 + 380}px`,
+        }} setIsAIMenuOpen={setIsAIMenuOpen} />
+      )}
       <MemoEditable
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         setIsMenuOpen={setIsMenuOpen}
+        setIsAIMenuOpen={setIsAIMenuOpen}
         setAnchor={setAnchor}
       />
     </Slate>
@@ -248,6 +256,7 @@ type MemoEditableProps = {
   renderElement: (props: RenderElementProps) => JSX.Element;
   renderLeaf: (props: RenderLeafProps) => JSX.Element;
   setIsMenuOpen: (isMenuOpen: boolean) => void;
+  setIsAIMenuOpen: (isAIMenuOpen: boolean) => void;
   setAnchor: (anchor: BasePoint | undefined) => void;
 };
 
@@ -256,6 +265,7 @@ const MemoEditable = memo(
     renderElement,
     renderLeaf,
     setIsMenuOpen,
+    setIsAIMenuOpen,
     setAnchor,
   }: MemoEditableProps) => {
     const editor = useSlate();
@@ -279,6 +289,10 @@ const MemoEditable = memo(
           }
           if (isHotkey("Escape", e)) {
             setIsMenuOpen(false);
+            setIsAIMenuOpen(false)
+          }
+          if (isHotkey("mod+i", e)) {
+            setIsAIMenuOpen(true)
           }
           setAnchor(editor.selection?.anchor);
         }}

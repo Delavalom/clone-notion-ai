@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getLastUpdatedNote } from "../helpers/getLastUpdatedNote";
 import { protectedProcedure, router } from "../trpc";
+import type { Descendant } from "slate";
 
 export const noteRouter = router({
   getNotes: protectedProcedure.query(async ({ ctx }) => {
@@ -21,8 +22,19 @@ export const noteRouter = router({
           code: "NOT_FOUND",
         });
       }
-      const content = await ctx.redis.get(input.id);
+      const content = await ctx.redis.get<Descendant[]>(input.id);
+
+      if (!content) {
+        return { note, content: [
+          {
+            type: "paragraph",
+            children: [{ text: ""}]
+          }
+        ] satisfies Descendant[] };
+        
+      }
       return { note, content };
+      
     }),
   createNote: protectedProcedure.mutation(async ({ ctx }) => {
     const newNote = await ctx.prisma.note.create({
