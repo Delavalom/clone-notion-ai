@@ -2,13 +2,12 @@
 import { type Note } from "@prisma/client";
 import Image from "next/image";
 import { withRouter, type Router } from "next/router";
-import { useState, type FC } from "react";
+import { useEffect, useState, type FC } from "react";
 import { toast } from "react-hot-toast";
 import { SlateEditor } from "~/components/Editor";
 import { OverlayBg } from "~/components/Layouts/OverlayBg";
 import { Sidebar } from "~/components/Sidebar";
 import { NavigationProvider } from "~/context/NavigationContext";
-import { useDebouncer } from "~/hooks/useDebouncer";
 import { api } from "~/utils/api";
 import notesBg from "../../public/notesBg.png";
 
@@ -47,7 +46,13 @@ const Note: FC<Props> = ({ router }) => {
     mutate({ id: note.id, title });
   };
 
-  useDebouncer(input, handleTitleUpdate);
+  useEffect(() => {
+    const updateTitle = setTimeout(() => {
+      handleTitleUpdate(input);
+    }, 700);
+
+    return () => clearTimeout(updateTitle);
+  }, [input]);
 
   return (
     <NavigationProvider>

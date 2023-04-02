@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { elementSelect } from "../db";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { Descendant } from "slate";
+import { takeCoverage } from "v8";
 
 export type MyNotePayload = Prisma.NoteGetPayload<{
   include: {
@@ -14,7 +15,7 @@ export type MyNotePayload = Prisma.NoteGetPayload<{
   };
 }>;
 
-const updateManyNotesSchema: z.ZodType<{id: string, body: Descendant[]}> = z.object({
+const updateManyNotesSchema = z.object({
   id: z.string().uuid(),
   body: z
     .object({
@@ -30,8 +31,8 @@ const updateManyNotesSchema: z.ZodType<{id: string, body: Descendant[]}> = z.obj
         })
         .array(),
     })
-    .array(),
-})
+    .array()
+}) satisfies z.ZodType<{id: string, body: Descendant[]}>
 
 export type UpdateManyNotesSchema = z.infer<typeof updateManyNotesSchema>
 
@@ -98,13 +99,8 @@ export const noteRouter = router({
   updateNoteBody: protectedProcedure
     .input(updateManyNotesSchema)
     .mutation(async ({ ctx, input }) => {
-      const noteUpdate = await ctx.prisma.note.updateMany({
-        where: {
-          id: input.id,
-        },
-        data: input.body,
-      });
-      return noteUpdate.count;
+      await ctx.redis.set(input.id, input.body)
+      
     }),
   deleteNote: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))

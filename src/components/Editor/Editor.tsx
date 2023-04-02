@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/display-name */
 import isHotkey from "is-hotkey";
 import {
@@ -23,6 +24,7 @@ import {
   type CSSProperties,
   type ReactNode,
   type Ref,
+  useEffect,
 } from "react";
 import { toast } from "react-hot-toast";
 import type { Descendant } from "slate";
@@ -44,7 +46,6 @@ import {
   type RenderElementProps,
   type RenderLeafProps,
 } from "slate-react";
-import { useDebouncer } from "~/hooks/useDebouncer";
 import { useSelection } from "~/hooks/useSelection";
 import type { MyNotePayload } from "~/server/db";
 import { api } from "~/utils/api";
@@ -103,6 +104,7 @@ export const SlateEditor = ({
   const [body, setBody] = useState<Descendant[]>([])
   const [anchor, setAnchor] = useState<BasePoint | undefined>(undefined);
   const { mutate } = api.note.updateNoteBody.useMutation({
+    retry: false,
     onSuccess(data) {
       toast.success(`Successfully update ${data} records`);
     },
@@ -123,12 +125,19 @@ export const SlateEditor = ({
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   const handleBodyUpdate = (body: Descendant[]) => {
-    if (!note?.id) return;
+    if (!note?.id || typeof body[0] === "undefined") return;
 
     mutate({ id: note.id, body })
   }
 
-  useDebouncer(body, handleBodyUpdate)
+  const memoizedBody = useMemo(() => body, [body])
+
+  useEffect(() => {
+    const id  = setTimeout(()=> {
+      handleBodyUpdate(memoizedBody)
+    }, 1200)
+    return () => clearTimeout(id)
+  }, [memoizedBody])
 
 
   if (isLoading || !note?.children) {
