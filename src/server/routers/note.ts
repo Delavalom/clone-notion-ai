@@ -1,53 +1,7 @@
-import { protectedProcedure, router } from "../trpc";
-import { getLastUpdatedNote } from "../helpers/getLastUpdatedNote";
-import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { elementSelect } from "../db";
-import type { Prisma, PrismaClient } from "@prisma/client";
-import type { Descendant } from "slate";
-import { takeCoverage } from "v8";
-
-export type MyNotePayload = Prisma.NoteGetPayload<{
-  include: {
-    children: {
-      select: typeof elementSelect;
-    };
-  };
-}>;
-
-const updateManyNotesSchema = z.object({
-  id: z.string().uuid(),
-  body: z
-    .object({
-      type: z.string(),
-      children: z
-        .object({
-          text: z.string().min(1),
-          bold: z.boolean().nullable(),
-          italic: z.boolean().nullable(),
-          code: z.boolean().nullable(),
-          underline: z.boolean().nullable(),
-          strikethrough: z.boolean().nullable(),
-        })
-        .array(),
-    })
-    .array()
-}) satisfies z.ZodType<{id: string, body: Descendant[]}>
-
-export type UpdateManyNotesSchema = z.infer<typeof updateManyNotesSchema>
-
-export const getNote = (prisma: PrismaClient, id: string) => {
-  return prisma.note.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      children: {
-        select: elementSelect,
-      },
-    },
-  });
-};
+import { z } from "zod";
+import { getLastUpdatedNote } from "../helpers/getLastUpdatedNote";
+import { protectedProcedure, router } from "../trpc";
 
 export const noteRouter = router({
   getNotes: protectedProcedure.query(async ({ ctx }) => {
@@ -56,15 +10,19 @@ export const noteRouter = router({
   getNote: protectedProcedure
     .input(z.object({ id: z.string().uuid().min(1) }))
     .query(async ({ ctx, input }) => {
-      const note = await getNote(ctx.prisma, input.id);
+      const note = await ctx.prisma.note.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
 
       if (!note) {
         throw new TRPCError({
           code: "NOT_FOUND",
         });
       }
-
-      return note;
+      const content = await ctx.redis.get(input.id);
+      return { note, content };
     }),
   createNote: protectedProcedure.mutation(async ({ ctx }) => {
     const newNote = await ctx.prisma.note.create({
@@ -97,10 +55,14 @@ export const noteRouter = router({
       });
     }),
   updateNoteBody: protectedProcedure
-    .input(updateManyNotesSchema)
+    .input(
+      z.object({
+        id: z.string().uuid().min(1),
+        content: z.any(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      await ctx.redis.set(input.id, input.body)
-      
+      await ctx.redis.set(input.id, input.content);
     }),
   deleteNote: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))

@@ -47,29 +47,30 @@ import {
   type RenderLeafProps,
 } from "slate-react";
 import { useSelection } from "~/hooks/useSelection";
-import type { MyNotePayload } from "~/server/db";
 import { api } from "~/utils/api";
 import { RenderElement, RenderLeaf } from "./Renders";
+import type { Note } from "@prisma/client";
+
 
 export type CustomText = {
   text: string;
-  bold: boolean | null;
-  code: boolean | null;
-  italic: boolean | null;
-  underline: boolean | null;
-  strikethrough: boolean | null;
+  bold?: true;
+  code?: true;
+  italic?: true;
+  underline?: true;
+  strikethrough?: true;
 };
 
 export type CustomElement = {
-  type: string;
-  // | "paragraph"
-  // | "bulleted-list"
-  // | "block-quote"
-  // | "heading-one"
-  // | "heading-two"
-  // | "heading-three"
-  // | "list-item"
-  // | "numbered-list";
+  type: 
+  | "paragraph"
+  | "bulleted-list"
+  | "block-quote"
+  | "heading-one"
+  | "heading-two"
+  | "heading-three"
+  | "list-item"
+  | "numbered-list";
   level?: 1 | 2 | 3;
   align?: string;
   children: CustomText[];
@@ -93,10 +94,10 @@ const HOTKEYS = {
 } as const;
 
 export const SlateEditor = ({
-  note,
+  data,
   isLoading,
 }: {
-  note: MyNotePayload | undefined;
+  data: {note: Note, content: unknown} | undefined;
   isLoading: boolean;
 }) => {
   const selection = useSelection();
@@ -105,8 +106,8 @@ export const SlateEditor = ({
   const [anchor, setAnchor] = useState<BasePoint | undefined>(undefined);
   const { mutate } = api.note.updateNoteBody.useMutation({
     retry: false,
-    onSuccess(data) {
-      toast.success(`Successfully update ${data} records`);
+    onSuccess() {
+      toast.success(`Successfully update`);
     },
     onError() {
       toast.error("Updating didn't work.");
@@ -124,10 +125,10 @@ export const SlateEditor = ({
 
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
-  const handleBodyUpdate = (body: Descendant[]) => {
-    if (!note?.id || typeof body[0] === "undefined") return;
+  const handleBodyUpdate = (content: Descendant[]) => {
+    if (!data || !data.note?.id) return;
 
-    mutate({ id: note.id, body })
+    mutate({ id: data.note.id, content })
   }
 
   const memoizedBody = useMemo(() => body, [body])
@@ -140,14 +141,14 @@ export const SlateEditor = ({
   }, [memoizedBody])
 
 
-  if (isLoading || !note?.children) {
+  if (isLoading || !data?.content) {
     return <div className="skeleton h-8 w-full rounded-2xl " />;
   }
 
   return (
     <Slate
       editor={editor}
-      value={note?.children}
+      value={data.content as Descendant[]}
       onChange={(value) => {
         const isAstChange = editor.operations.some(
           (op) => "set_selection" !== op.type

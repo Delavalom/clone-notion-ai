@@ -18,12 +18,12 @@ type Props = {
 const Note: FC<Props> = ({ router }) => {
   const [input, setInput] = useState("");
   const context = api.useContext();
-  const { data: note, isLoading } = api.note.getNote.useQuery(
+  const { data, isLoading } = api.note.getNote.useQuery(
     { id: router.asPath.replace("/", "") },
     {
       enabled: router.isReady,
-      onSuccess({ title }) {
-        setInput(title);
+      onSuccess({ note }) {
+        setInput(note.title);
         toast.success("Successfully fetch data");
       },
       onError(err) {
@@ -42,8 +42,8 @@ const Note: FC<Props> = ({ router }) => {
   });
 
   const handleTitleUpdate = (title: string) => {
-    if (title === note?.title || !note?.id) return;
-    mutate({ id: note.id, title });
+    if (title === data?.note?.title || !data?.note?.id) return;
+    mutate({ id: data?.note.id, title });
   };
 
   useEffect(() => {
@@ -73,7 +73,7 @@ const Note: FC<Props> = ({ router }) => {
               className="flex h-full w-full max-w-[700px] flex-1 flex-col text-left"
             >
               {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
-              <SlateEditor note={note} isLoading={isLoading} />
+              <SlateEditor data={data} isLoading={isLoading} />
             </article>
           </div>
         </section>
