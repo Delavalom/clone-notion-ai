@@ -2,6 +2,51 @@ import { protectedProcedure, router } from "../trpc";
 import { getLastUpdatedNote } from "../helpers/getLastUpdatedNote";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { elementSelect } from "../db";
+import type { Prisma, PrismaClient } from "@prisma/client";
+import type { Descendant } from "slate";
+
+export type MyNotePayload = Prisma.NoteGetPayload<{
+  include: {
+    children: {
+      select: typeof elementSelect;
+    };
+  };
+}>;
+
+const updateManyNotesSchema: z.ZodType<{id: string, body: Descendant[]}> = z.object({
+  id: z.string().uuid(),
+  body: z
+    .object({
+      type: z.string(),
+      children: z
+        .object({
+          text: z.string().min(1),
+          bold: z.boolean().nullable(),
+          italic: z.boolean().nullable(),
+          code: z.boolean().nullable(),
+          underline: z.boolean().nullable(),
+          strikethrough: z.boolean().nullable(),
+        })
+        .array(),
+    })
+    .array(),
+})
+
+export type UpdateManyNotesSchema = z.infer<typeof updateManyNotesSchema>
+
+export const getNote = (prisma: PrismaClient, id: string) => {
+  return prisma.note.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      children: {
+        select: elementSelect,
+      },
+    },
+  });
+};
 
 export const noteRouter = router({
   getNotes: protectedProcedure.query(async ({ ctx }) => {
@@ -10,11 +55,8 @@ export const noteRouter = router({
   getNote: protectedProcedure
     .input(z.object({ id: z.string().uuid().min(1) }))
     .query(async ({ ctx, input }) => {
-      const note = await ctx.prisma.note.findUnique({
-        where: {
-          id: input.id,
-        },
-      });
+      const note = await getNote(ctx.prisma, input.id);
+
       if (!note) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -27,7 +69,6 @@ export const noteRouter = router({
     const newNote = await ctx.prisma.note.create({
       data: {
         userId: ctx.session.user.id,
-        body: "",
       },
     });
     return newNote.id;
@@ -54,6 +95,17 @@ export const noteRouter = router({
         },
       });
     }),
+  updateNoteBody: protectedProcedure
+    .input(updateManyNotesSchema)
+    .mutation(async ({ ctx, input }) => {
+      const noteUpdate = await ctx.prisma.note.updateMany({
+        where: {
+          id: input.id,
+        },
+        data: input.body,
+      });
+      return noteUpdate.count;
+    }),
   deleteNote: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
@@ -65,15 +117,8 @@ export const noteRouter = router({
           id: true,
         },
       });
-      // const lastNote = await getLastUpdatedNote(ctx.session.user.id);
-      // if (!lastNote) {
-      //   throw new TRPCError({
-      //     code: "NOT_FOUND",
-      //   });
-      // }
       return {
         id,
-        // lastNote,
       };
     }),
   getLastUpdatedNote: protectedProcedure.query(async ({ ctx }) => {

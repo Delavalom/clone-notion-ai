@@ -24,6 +24,8 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
+import { toast } from "react-hot-toast";
+import type { Descendant } from "slate";
 import {
   Editor,
   Element as SlateElement,
@@ -31,7 +33,6 @@ import {
   createEditor,
   type BaseEditor,
   type BasePoint,
-  type Descendant
 } from "slate";
 import { withHistory } from "slate-history";
 import {
@@ -43,28 +44,31 @@ import {
   type RenderElementProps,
   type RenderLeafProps,
 } from "slate-react";
+import { useDebouncer } from "~/hooks/useDebouncer";
 import { useSelection } from "~/hooks/useSelection";
+import type { MyNotePayload } from "~/server/db";
+import { api } from "~/utils/api";
 import { RenderElement, RenderLeaf } from "./Renders";
 
 export type CustomText = {
   text: string;
-  bold?: true;
-  code?: true;
-  italic?: true;
-  underline?: true;
-  strikethrough?: true;
+  bold: boolean | null;
+  code: boolean | null;
+  italic: boolean | null;
+  underline: boolean | null;
+  strikethrough: boolean | null;
 };
 
 export type CustomElement = {
-  type:
-    | "paragraph"
-    | "bulleted-list"
-    | "block-quote"
-    | "heading-one"
-    | "heading-two"
-    | "heading-three"
-    | "list-item"
-    | "numbered-list";
+  type: string;
+  // | "paragraph"
+  // | "bulleted-list"
+  // | "block-quote"
+  // | "heading-one"
+  // | "heading-two"
+  // | "heading-three"
+  // | "list-item"
+  // | "numbered-list";
   level?: 1 | 2 | 3;
   align?: string;
   children: CustomText[];
@@ -87,24 +91,25 @@ const HOTKEYS = {
   "mod+s": "strikethrough",
 } as const;
 
-const initialValue: Descendant[] = [
-  // these are the Nodes
-  {
-    // these are Elements
-    type: "paragraph",
-    children: [
-      // these are Text
-      {
-        text: "",
-      },
-    ],
-  },
-];
-
-export const SlateEditor = () => {
+export const SlateEditor = ({
+  note,
+  isLoading,
+}: {
+  note: MyNotePayload | undefined;
+  isLoading: boolean;
+}) => {
   const selection = useSelection();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [body, setBody] = useState<Descendant[]>([])
   const [anchor, setAnchor] = useState<BasePoint | undefined>(undefined);
+  const { mutate } = api.note.updateNoteBody.useMutation({
+    onSuccess(data) {
+      toast.success(`Successfully update ${data} records`);
+    },
+    onError() {
+      toast.error("Updating didn't work.");
+    },
+  });
 
   const renderElement = useCallback(
     (props: RenderElementProps) => <RenderElement {...props} />,
@@ -117,11 +122,36 @@ export const SlateEditor = () => {
 
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
+  const handleBodyUpdate = (body: Descendant[]) => {
+    if (!note?.id) return;
+
+    mutate({ id: note.id, body })
+  }
+
+  useDebouncer(body, handleBodyUpdate)
+
+
+  if (isLoading || !note?.children) {
+    return <div className="skeleton h-8 w-full rounded-2xl " />;
+  }
+
   return (
-    <Slate editor={editor} value={initialValue}>
+    <Slate
+      editor={editor}
+      value={note?.children}
+      onChange={(value) => {
+        const isAstChange = editor.operations.some(
+          (op) => "set_selection" !== op.type
+        );
+        if (isAstChange) {
+          // Save the value to Local Storage.
+          setBody(value)
+        }
+      }}
+    >
       {/* 
         TODO: Toolbar only available when text highlighted. ✅ DONE
-        TODO: takes the editor.selection and style his position with offset: number and path [number, number]
+        TODO: takes the editor.selection and style his position with offset: number and path [number, number] ✅
         TODO: also takes the highlighted selection and transformed depending on option choosed. ✅ DONE
         TODO: the only way to make toolbar dissapear is by move cursor of selecting text or click outside toolbar. ✅ DONE
       */}
@@ -129,10 +159,10 @@ export const SlateEditor = () => {
         <Toolbar
           style={{
             position: "absolute",
-            left: `${(anchor?.offset  ?? 0) * 13}px`,
-            top: `${(anchor?.path[0]  ?? 0) * 220}px`,
+            left: `${(anchor?.offset ?? 0) * 6 + 360}px`,
+            top: `${(anchor?.path[0] ?? 0) * 25 + 380}px`, // 2 * 440px perfect point
           }}
-          className="z-50 bg-white flex w-fit items-center overflow-hidden rounded-lg  border border-gray-900/5 shadow-sm shadow-gray-300 transition-all duration-200"
+          className="z-50 flex w-fit items-center overflow-hidden rounded-lg border  border-gray-900/5 bg-white shadow-sm shadow-gray-300 transition-all duration-200"
         >
           <MarkButton type="bold" Icon={Bold} />
           <MarkButton type="italic" Icon={Italic} />
@@ -148,7 +178,7 @@ export const SlateEditor = () => {
             left: `${(anchor?.offset ?? 0) * 13}px`,
             top: `${(anchor?.path[0] ?? 0) * 220}px`,
           }}
-          className="z-50 bg-white flex max-h-[400px] w-fit flex-col overflow-y-scroll scroll-smooth rounded-lg border border-gray-900/5 p-1 shadow-sm shadow-gray-300 transition-all duration-200"
+          className="z-50 flex max-h-[400px] w-fit flex-col overflow-y-scroll scroll-smooth rounded-lg border border-gray-900/5 bg-white p-1 shadow-sm shadow-gray-300 transition-all duration-200"
         >
           <BlockOption
             type="paragraph"
@@ -195,7 +225,6 @@ export const SlateEditor = () => {
         </Toolbar>
       )}
       <MemoEditable
-        editor={editor}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         setIsMenuOpen={setIsMenuOpen}
@@ -206,7 +235,6 @@ export const SlateEditor = () => {
 };
 
 type MemoEditableProps = {
-  editor: Editor;
   renderElement: (props: RenderElementProps) => JSX.Element;
   renderLeaf: (props: RenderLeafProps) => JSX.Element;
   setIsMenuOpen: (isMenuOpen: boolean) => void;
@@ -215,12 +243,12 @@ type MemoEditableProps = {
 
 const MemoEditable = memo(
   ({
-    editor,
     renderElement,
     renderLeaf,
     setIsMenuOpen,
     setAnchor,
   }: MemoEditableProps) => {
+    const editor = useSlate();
     return (
       <Editable
         renderElement={renderElement}

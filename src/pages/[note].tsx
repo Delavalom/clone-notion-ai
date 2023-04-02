@@ -2,12 +2,13 @@
 import { type Note } from "@prisma/client";
 import Image from "next/image";
 import { withRouter, type Router } from "next/router";
-import { useEffect, useState, type FC } from "react";
+import { useState, type FC } from "react";
 import { toast } from "react-hot-toast";
 import { SlateEditor } from "~/components/Editor";
 import { OverlayBg } from "~/components/Layouts/OverlayBg";
 import { Sidebar } from "~/components/Sidebar";
 import { NavigationProvider } from "~/context/NavigationContext";
+import { useDebouncer } from "~/hooks/useDebouncer";
 import { api } from "~/utils/api";
 import notesBg from "../../public/notesBg.png";
 
@@ -46,13 +47,7 @@ const Note: FC<Props> = ({ router }) => {
     mutate({ id: note.id, title });
   };
 
-  useEffect(() => {
-    const updateTitle = setTimeout(() => {
-      handleTitleUpdate(input);
-    }, 700);
-
-    return () => clearTimeout(updateTitle);
-  }, [input]);
+  useDebouncer(input, handleTitleUpdate);
 
   return (
     <NavigationProvider>
@@ -72,8 +67,8 @@ const Note: FC<Props> = ({ router }) => {
               aria-multiline={true}
               className="flex h-full w-full max-w-[700px] flex-1 flex-col text-left"
             >
-              {/* create a new component for article */}
-              <SlateEditor />
+              {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
+              <SlateEditor note={note} isLoading={isLoading} />
             </article>
           </div>
         </section>
