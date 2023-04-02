@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { Trash2 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
