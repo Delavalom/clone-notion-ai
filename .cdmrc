@@ -1,0 +1,3 @@
+tabs: ["src/pages/index.tsx"]
+terminals: ["yarn && yarn dev"]
+playground-view: "terminal-editor-browser"
