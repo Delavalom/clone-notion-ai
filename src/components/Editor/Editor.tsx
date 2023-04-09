@@ -275,7 +275,7 @@ const MemoEditable = memo(
         renderLeaf={renderLeaf}
         spellCheck
         autoFocus
-        placeholder="Press command or ctrl + `space` for AI, command or ctrl + '/' for block actions..."
+        placeholder="Press command or ctrl + `i` for AI, command or ctrl + '/' for block actions..."
         onKeyDown={(e) => {
           for (const hotkey in HOTKEYS) {
             if (isHotkey(hotkey, e)) {

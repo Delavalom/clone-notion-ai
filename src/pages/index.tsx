@@ -1,24 +1,27 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
-import Head from "next/head";
 import { Inter } from "@next/font/google";
-import styles from "~/styles/Home.module.css";
+import type { GetServerSideProps, GetStaticProps } from "next";
 import { signIn } from "next-auth/react";
-import type { GetServerSideProps } from "next";
+import Head from "next/head";
 import { getServerAuthSession } from "~/server/auth";
-import { getLastUpdatedNote } from "~/server/helpers/getLastUpdatedNote";
+import { ssgHelper } from "~/server/helpers/ssgHelper";
+import styles from "~/styles/Home.module.css";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await getServerAuthSession(context);
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const session = await getServerAuthSession(ctx)
+  
+  const ssg = ssgHelper(session)
 
   if (!session) {
     return {
-      props: {}
+      props: {},
     };
   }
 
-  const note = await getLastUpdatedNote(session.user.id);
+  const note = await ssg.note.getLastUpdatedNote.fetch()
 
   return {
     redirect: {

@@ -4,8 +4,9 @@ import superjson from 'superjson';
 import { prisma, redis } from "../db";
 import { appRouter } from "../routers/_app";
 
+
 export const ssgHelper = (session:  Session | null) => createProxySSGHelpers({
   router: appRouter,
-  ctx: { prisma, session, redis},
+  ctx: { prisma, redis, session},
   transformer: superjson
 });

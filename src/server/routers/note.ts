@@ -1,8 +1,7 @@
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-import { getLastUpdatedNote } from "../helpers/getLastUpdatedNote";
-import { protectedProcedure, router } from "../trpc";
 import type { Descendant } from "slate";
+import { z } from "zod";
+import { protectedProcedure, router } from "../trpc";
+import { TRPCError } from "@trpc/server";
 
 export const noteRouter = router({
   getNotes: protectedProcedure.query(async ({ ctx }) => {
@@ -19,8 +18,8 @@ export const noteRouter = router({
 
       if (!note) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-        });
+          code: "NOT_FOUND"
+        })
       }
       const content = await ctx.redis.get<Descendant[]>(input.id);
 
@@ -92,6 +91,20 @@ export const noteRouter = router({
       };
     }),
   getLastUpdatedNote: protectedProcedure.query(async ({ ctx }) => {
-    return getLastUpdatedNote(ctx.session.user.id);
+    const notes = await ctx.prisma.note.findMany({
+      orderBy: {
+        updatedAt: "desc",
+      },
+    });
+    const note = notes.find((note) => note.userId === ctx.session.user.id);
+    if (!note) {
+      const newNote = await ctx.prisma.note.create({
+        data: {
+          userId: ctx.session.user.id,
+        },
+      })
+      return newNote
+    }
+    return note
   }),
 });
