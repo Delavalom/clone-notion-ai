@@ -25,7 +25,7 @@ import {
   useState,
   type CSSProperties,
   type ReactNode,
-  type Ref
+  type Ref,
 } from "react";
 import { toast } from "react-hot-toast";
 import type { Descendant } from "slate";
@@ -93,6 +93,68 @@ const HOTKEYS = {
   "mod+s": "strikethrough",
 } as const;
 
+const marksDetails = [
+  {
+    type: "bold",
+    Icon: Bold,
+  },
+  {
+    type: "italic",
+    Icon: Italic,
+  },
+  {
+    type: "underline",
+    Icon: Underline,
+  },
+  {
+    type: "strikethrough",
+    Icon: Strikethrough,
+  },
+  {
+    type: "code",
+    Icon: Code,
+  },
+] as const;
+
+const blockDetails = [
+  {
+    type: "paragraph",
+    title: "Text",
+    subTitle: "Just start writing with plain text.",
+    Icon: Type,
+  },
+  {
+    type: "heading-one",
+    title: "Heading 1",
+    subTitle: "Big section heading.",
+    Icon: Heading1,
+  },
+  {
+    type: "heading-two",
+    title: "Heading 2",
+    subTitle: "Medium section heading.",
+    Icon: Heading2,
+  },
+  {
+    type: "heading-three",
+    title: "Heading 3",
+    subTitle: "Small section heading.",
+    Icon: Heading3,
+  },
+  {
+    type: "bulleted-list",
+    title: "Bulleted List",
+    subTitle: "Create a simple bulleted list.",
+    Icon: List,
+  },
+  {
+    type: "block-quote",
+    title: "Quote",
+    subTitle: "Capture a quote.",
+    Icon: Quote,
+  },
+] as const
+
 export const SlateEditor = ({
   data,
   isLoading,
@@ -143,7 +205,7 @@ export const SlateEditor = ({
 
   if (isLoading) {
     return <div className="skeleton h-8 w-full rounded-2xl " />;
-  } 
+  }
 
   return (
     <Slate
@@ -174,11 +236,9 @@ export const SlateEditor = ({
           }}
           className="z-50 flex w-fit items-center overflow-hidden rounded-lg border  border-gray-900/5 bg-white shadow-sm shadow-gray-300 transition-all duration-200"
         >
-          <MarkButton type="bold" Icon={Bold} />
-          <MarkButton type="italic" Icon={Italic} />
-          <MarkButton type="underline" Icon={Underline} />
-          <MarkButton type="strikethrough" Icon={Strikethrough} />
-          <MarkButton type="code" Icon={Code} />
+          {marksDetails.map((mark) => (
+            <MarkButton key={mark.type} type={mark.type} Icon={mark.Icon} />
+          ))}
         </Toolbar>
       )}
       {isMenuOpen && (
@@ -190,56 +250,27 @@ export const SlateEditor = ({
           }}
           className="z-50 flex max-h-[400px] w-fit flex-col overflow-y-scroll scroll-smooth rounded-lg border border-gray-900/5 bg-white p-1 shadow-sm shadow-gray-300 transition-all duration-200"
         >
-          <BlockOption
-            type="paragraph"
-            title="Text"
-            subTitle="Just start writing with plain text."
-            Icon={Type}
-            setIsMenuOpen={setIsMenuOpen}
-          />
-          <BlockOption
-            type="heading-one"
-            title="Heading 1"
-            subTitle="Big section heading."
-            Icon={Heading1}
-            setIsMenuOpen={setIsMenuOpen}
-          />
-          <BlockOption
-            type="heading-two"
-            title="Heading 2"
-            subTitle="Medium section heading."
-            Icon={Heading2}
-            setIsMenuOpen={setIsMenuOpen}
-          />
-          <BlockOption
-            type="heading-three"
-            title="Heading 3"
-            subTitle="Small section heading."
-            Icon={Heading3}
-            setIsMenuOpen={setIsMenuOpen}
-          />
-          <BlockOption
-            type="bulleted-list"
-            title="Bulleted List"
-            subTitle="Create a simple bulleted list."
-            Icon={List}
-            setIsMenuOpen={setIsMenuOpen}
-          />
-          <BlockOption
-            type="block-quote"
-            title="Quote"
-            subTitle="Capture a quote."
-            Icon={Quote}
-            setIsMenuOpen={setIsMenuOpen}
-          />
+          {blockDetails.map(block => (
+            <BlockOption
+            key={block.type}
+              type={block.type}
+              title={block.title}
+              subTitle={block.subTitle}
+              Icon={block.Icon}
+              setIsMenuOpen={setIsMenuOpen}
+            />
+          ))}
         </Toolbar>
       )}
       {isAIMenuOpen && (
-        <MenuAI style={{
-          position: "absolute",
-          left: `${(anchor?.offset ?? 0) * 6 + 360}px`,
-          top: `${(anchor?.path[0] ?? 0) * 25 + 380}px`,
-        }} setIsAIMenuOpen={setIsAIMenuOpen} />
+        <MenuAI
+          style={{
+            position: "absolute",
+            left: `${(anchor?.offset ?? 0) * 6 + 360}px`,
+            top: `${(anchor?.path[0] ?? 0) * 25 + 380}px`,
+          }}
+          setIsAIMenuOpen={setIsAIMenuOpen}
+        />
       )}
       <MemoEditable
         renderElement={renderElement}
@@ -289,10 +320,10 @@ const MemoEditable = memo(
           }
           if (isHotkey("Escape", e)) {
             setIsMenuOpen(false);
-            setIsAIMenuOpen(false)
+            setIsAIMenuOpen(false);
           }
           if (isHotkey("mod+i", e)) {
-            setIsAIMenuOpen(true)
+            setIsAIMenuOpen(true);
           }
           setAnchor(editor.selection?.anchor);
         }}
