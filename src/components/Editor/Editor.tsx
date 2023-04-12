@@ -392,16 +392,15 @@ const MarkButton = memo(
   ({ type, Icon }: { type: TextType; Icon: LucideIcon }) => {
     const editor = useSlate();
     return (
-      <Button
+      <button
         className="h-full w-full border-gray-500/5 px-2 py-2 transition-all duration-100 hover:border-x-2 hover:bg-gray-200"
-        active={isMarkActive(editor, type)}
-        onMouseDown={(e: MouseEvent) => {
+        onMouseDown={(e) => {
           e.preventDefault();
           toggleMark(editor, type);
         }}
       >
         <Icon className="h-4 w-4 stroke-gray-800 stroke-2" />
-      </Button>
+      </button>
     );
   }
 );
@@ -421,20 +420,20 @@ const BlockOption = ({
 }) => {
   const editor = useSlate();
   return (
-    <Button
+    <button
       className="button-block group gap-1 rounded-lg px-3 py-1 text-left transition-colors duration-200 hover:bg-gray-100"
-      onClick={(e: MouseEvent) => {
+      onClick={(e) => {
         e.preventDefault();
         toggleBlock(editor, type);
         setIsMenuOpen(false);
       }}
     >
       <Icon className="icon my-auto h-16 w-16 rounded-lg border border-gray-900/25 stroke-gray-700 p-4 transition-colors duration-200 group-hover:bg-white" />
-      <Span className="mt-auto text-sm font-medium text-gray-900/80">
+      <span className="mt-auto text-sm font-medium text-gray-900/80">
         {title}
-      </Span>
-      <Span className="text-xs font-light text-gray-900/60">{subTitle}</Span>
-    </Button>
+      </span>
+      <span className="text-xs font-light text-gray-900/60">{subTitle}</span>
+    </button>
   );
 };
 
@@ -456,53 +455,9 @@ const Toolbar = memo(
       { className, children, style, ...props }: BaseProps,
       ref: Ref<HTMLDivElement>
     ) => (
-      <Menu style={style} className={className} {...props} ref={ref}>
-        {children}
-      </Menu>
-    )
-  )
-);
-
-const Button = memo(
-  forwardRef(
-    (
-      { children, active, ...props }: BaseProps,
-      ref: Ref<HTMLButtonElement>
-    ) => (
-      <button
-        tabIndex={0}
-        {...props}
-        ref={ref}
-        style={{ color: active ? "blue" : "black" }}
-      >
-        {children}
-      </button>
-    )
-  )
-);
-
-const Menu = memo(
-  forwardRef(
-    (
-      { className, children, style, ...props }: BaseProps,
-      ref: Ref<HTMLDivElement>
-    ) => (
       <div style={style} className={className} {...props} ref={ref}>
         {children}
       </div>
-    )
-  )
-);
-
-const Span = memo(
-  forwardRef(
-    (
-      { className, children, ...props }: BaseProps,
-      ref: Ref<HTMLSpanElement>
-    ) => (
-      <span className={className} {...props} ref={ref}>
-        {children}
-      </span>
     )
   )
 );
