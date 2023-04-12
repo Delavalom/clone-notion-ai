@@ -74,10 +74,7 @@ export const Sidebar: FC = () => {
         <button
           id="signOutButton"
           className="text-md flex items-center gap-2 border-y-2 border-gray-500/5 py-4 px-4 text-start text-gray-500 transition-colors duration-300 hover:bg-gray-200"
-          onClick={() => {
-            signOut()
-            router.replace('/')
-          }}
+          onClick={() => signOut({ redirect: true, callbackUrl: "/" })}
         >
           Sign Out
         </button>

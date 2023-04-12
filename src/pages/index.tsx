@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { Inter } from "@next/font/google";
-import type { GetServerSideProps, GetStaticProps } from "next";
+import type { GetServerSideProps } from "next";
 import { signIn } from "next-auth/react";
 import Head from "next/head";
 import { getServerAuthSession } from "~/server/auth";
@@ -21,7 +21,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     };
   }
 
-  const note = await ssg.note.getLastUpdatedNote.fetch()
+  const note = await ssg.getLastUpdatedNote.fetch()
 
   return {
     redirect: {

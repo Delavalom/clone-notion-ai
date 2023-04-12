@@ -5,7 +5,14 @@ import { TRPCError } from "@trpc/server";
 
 export const noteRouter = router({
   getNotes: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.note.findMany();
+    return ctx.prisma.user.findUnique({
+      where: {
+        id: ctx.session.user.id
+      },
+      select: {
+        notes: true
+      }
+    });
   }),
   getNote: protectedProcedure
     .input(z.object({ id: z.string().uuid().min(1) }))
@@ -16,7 +23,7 @@ export const noteRouter = router({
         },
       });
 
-      if (!note) {
+      if (!note || note.userId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "NOT_FOUND"
         })

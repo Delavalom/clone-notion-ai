@@ -1,10 +1,24 @@
+import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
 
 export const userRouter = router({
-    getUsers: protectedProcedure.query(async ({ctx}) => {
-        return ctx.prisma.user.findMany()
+  updateUsername: protectedProcedure
+    .input(
+      z.object({
+        username: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.prisma.user.update({
+        where: {
+          id: ctx.session.user.id,
+        },
+        data: {
+          username: input.username,
+        },
+        select: {
+            username: true
+        }
+      });
     }),
-    getUser: protectedProcedure.query(async ({ctx}) => {
-        return ctx.prisma.user.findMany()
-    }),
-})
+});
