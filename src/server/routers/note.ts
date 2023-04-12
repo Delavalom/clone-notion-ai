@@ -5,7 +5,7 @@ import { TRPCError } from "@trpc/server";
 
 export const noteRouter = router({
   getNotes: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.user.findUnique({
+    const data = await ctx.prisma.user.findUnique({
       where: {
         id: ctx.session.user.id
       },
@@ -13,6 +13,9 @@ export const noteRouter = router({
         notes: true
       }
     });
+    if (!data) return [] 
+    return data.notes
+
   }),
   getNote: protectedProcedure
     .input(z.object({ id: z.string().uuid().min(1) }))
