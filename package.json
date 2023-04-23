@@ -24,7 +24,7 @@
     "is-hotkey": "^0.2.0",
     "lucide-react": "^0.129.0",
     "next": "13.2.4",
-    "next-auth": "^4.20.1",
+    "next-auth": "^4.21.0",
     "openai": "^3.2.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
