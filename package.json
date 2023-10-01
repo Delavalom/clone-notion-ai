@@ -30,9 +30,9 @@
     "react-dom": "18.2.0",
     "react-hook-form": "^7.43.9",
     "react-hot-toast": "^2.4.0",
-    "slate": "^0.93.0",
-    "slate-history": "^0.86.0",
-    "slate-react": "^0.93.0",
+    "slate": "^0.91.4",
+    "slate-history": "^0.93.0",
+    "slate-react": "^0.92.0",
     "superjson": "^1.12.2",
     "zod": "^3.21.4"
   },
