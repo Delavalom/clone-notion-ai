@@ -34,7 +34,7 @@
     "slate-history": "^0.93.0",
     "slate-react": "^0.92.0",
     "superjson": "^1.12.2",
-    "zod": "^3.21.4"
+    "zod": "^3.22.3"
   },
   "devDependencies": {
     "@types/is-hotkey": "^0.1.7",
